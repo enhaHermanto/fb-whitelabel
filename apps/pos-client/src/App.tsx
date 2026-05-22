@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { usePOSStore } from './stores/posStore';
+import { useAuthStore } from './stores/authStore';
+import { LoginView } from './features/auth/LoginView';
 import { Header } from './components/Header';
 import { CashierView } from './features/cashier/CashierView';
 import { KitchenView } from './features/kitchen/KitchenView';
@@ -8,15 +10,47 @@ import { AdminView } from './features/admin/AdminView';
 import { ShieldAlert, RefreshCw } from 'lucide-react';
 
 const App: React.FC = () => {
-  const { setTenant, initializeSocket, isLoading, error } = usePOSStore();
+  const { tenantId, setTenant, initializeSocket, isLoading, error } = usePOSStore();
+  const { currentUser, isLoggedIn, initializeAuth, logout } = useAuthStore();
   const [currentTab, setCurrentTab] = useState<'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN'>('CASHIER');
 
+  // 1. Initialize Authentication session on mount
   useEffect(() => {
-    // 1. Set initial tenant as Solaria
+    initializeAuth();
+  }, [initializeAuth]);
+
+  // 2. Set initial tenant as Solaria & initialize Websocket client
+  useEffect(() => {
     setTenant('solaria');
-    // 2. Initialize Websocket client
     initializeSocket();
   }, [setTenant, initializeSocket]);
+
+  // 3. Multi-Tenant Session Security Guard: Logout if tenant changes and doesn't match current user
+  useEffect(() => {
+    if (isLoggedIn && currentUser && currentUser.tenant_id !== tenantId) {
+      logout();
+    }
+  }, [tenantId, currentUser, isLoggedIn, logout]);
+
+  // 4. Role-based Initial Routing Tab selection upon login
+  useEffect(() => {
+    if (isLoggedIn && currentUser) {
+      if (currentUser.role === 'KITCHEN') {
+        setCurrentTab('KITCHEN');
+      } else if (currentUser.role === 'RUNNER') {
+        setCurrentTab('RUNNER');
+      } else if (currentUser.role === 'KASIR') {
+        setCurrentTab('CASHIER');
+      } else if (currentUser.role === 'SYSADMIN' || currentUser.role === 'MANAGEMENT') {
+        setCurrentTab('ADMIN');
+      }
+    }
+  }, [isLoggedIn, currentUser]);
+
+  // If unauthenticated, show the custom glassmorphic Login View
+  if (!isLoggedIn) {
+    return <LoginView />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col transition-all duration-300">

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { usePOSStore } from '../../stores/posStore';
+import { useAuthStore } from '../../stores/authStore';
 import type { TenantConfig, Order } from '@resto-pos/shared-types';
 import { 
   Settings, Shield, CheckCircle, Palette, BarChart3, Lock, 
   Plus, ToggleLeft, ToggleRight, Loader2, Printer, Wifi, Sparkles, 
-  AlertCircle, TrendingUp, DollarSign, RotateCw 
+  AlertCircle, TrendingUp, DollarSign, RotateCw, Users, UserPlus, Trash2
 } from 'lucide-react';
 
 export const AdminView: React.FC = () => {
@@ -13,7 +14,15 @@ export const AdminView: React.FC = () => {
     addMenuItem, toggleMenuItem, saveCustomTenantConfig, isLoading 
   } = usePOSStore();
 
-  const [activeTab, setActiveTab] = useState<'BRANDING' | 'MENU_STOCK' | 'REPORTS' | 'SHIFT_CLOSE'>('BRANDING');
+  const [activeTab, setActiveTab] = useState<'BRANDING' | 'MENU_STOCK' | 'USERS' | 'REPORTS' | 'SHIFT_CLOSE'>('BRANDING');
+
+  // --- USER MANAGEMENT STATE ---
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newFullName, setNewFullName] = useState('');
+  const [newUserRole, setNewUserRole] = useState<'KASIR' | 'KITCHEN' | 'RUNNER' | 'MANAGEMENT' | 'SYSADMIN'>('KASIR');
+  const [newUserPassword, setNewUserPassword] = useState('');
 
   // --- BRANDING FORM STATE ---
   const [brandName, setBrandName] = useState('');
@@ -78,6 +87,100 @@ export const AdminView: React.FC = () => {
   useEffect(() => {
     fetchReports();
   }, [tenantId, orders]); // Reload reports when switching tenants or when orders update
+
+  // --- USER CRUD OPERATIONS ---
+  const fetchUsers = async () => {
+    setIsUsersLoading(true);
+    try {
+      const res = await fetch(`http://${window.location.hostname || 'localhost'}:5000/api/${tenantId}/users`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsersList(data);
+      }
+    } catch (e) {
+      console.error('Failed to load users', e);
+    } finally {
+      setIsUsersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'USERS') {
+      fetchUsers();
+    }
+  }, [tenantId, activeTab]);
+
+  // Real-time socket sync for user updates
+  useEffect(() => {
+    const socket = usePOSStore.getState().socket;
+    if (!socket) return;
+    const handleUsersUpdated = () => {
+      fetchUsers();
+    };
+    socket.on('users:updated', handleUsersUpdated);
+    return () => {
+      socket.off('users:updated', handleUsersUpdated);
+    };
+  }, [tenantId]);
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim() || !newFullName.trim() || !newUserPassword) {
+      alert('Mohon lengkapi seluruh data user!');
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://${window.location.hostname || 'localhost'}:5000/api/${tenantId}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: newUsername.trim().toLowerCase(),
+          name: newFullName.trim(),
+          role: newUserRole,
+          password: newUserPassword
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Gagal menambahkan user');
+      }
+
+      alert(`Berhasil menambahkan user baru: ${newFullName}!`);
+      setNewUsername('');
+      setNewFullName('');
+      setNewUserPassword('');
+      setNewUserRole('KASIR');
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, username: string) => {
+    const currentUser = useAuthStore.getState().currentUser;
+    if (currentUser && currentUser.id === userId) {
+      alert('Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif!');
+      return;
+    }
+
+    if (!confirm(`Apakah Anda yakin ingin menghapus user "${username}"?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://${window.location.hostname || 'localhost'}:5000/api/${tenantId}/users/${userId}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) throw new Error('Gagal menghapus user');
+      alert('User berhasil dihapus!');
+      fetchUsers();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
 
   const handleSwitchTenant = async (id: string) => {
     if (isLoading) return;
@@ -245,10 +348,11 @@ export const AdminView: React.FC = () => {
       </div>
 
       {/* PREMIUM TABS CONTROLLER */}
-      <div className="grid grid-cols-4 gap-2 bg-gray-100 p-1.5 rounded-brand border border-gray-200">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 bg-gray-100 p-1.5 rounded-brand border border-gray-200">
         {[
           { id: 'BRANDING', label: 'Kustomisasi Brand', icon: Palette },
           { id: 'MENU_STOCK', label: 'Manajemen Menu', icon: Sparkles },
+          { id: 'USERS', label: 'Manajemen User', icon: Users },
           { id: 'REPORTS', label: 'Laporan Omzet', icon: BarChart3 },
           { id: 'SHIFT_CLOSE', label: 'Tutup Shift', icon: Lock }
         ].map(tab => {
@@ -263,7 +367,7 @@ export const AdminView: React.FC = () => {
                   : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              <Icon className="w-4.5 h-4.5" />
+              <Icon className="w-4 h-4" />
               {tab.label}
             </button>
           );
@@ -626,7 +730,176 @@ export const AdminView: React.FC = () => {
         )}
 
         {/* =========================================== */}
-        {/* TAB 3: LAPORAN PENJUALAN (ANALYTICS)        */}
+        {/* TAB 3: USER MANAGEMENT CRUD PANEL           */}
+        {/* =========================================== */}
+        {activeTab === 'USERS' && (
+          <div className="grid lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
+            
+            {/* TAMBAH USER BARU FORM */}
+            <div className="bg-gray-50 rounded-brand p-5 border border-gray-200 shadow-inner h-fit space-y-4">
+              <h4 className="font-extrabold text-gray-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <UserPlus className="w-4 h-4 text-brand-primary" /> Tambah User Baru
+              </h4>
+              <form onSubmit={handleAddUser} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-gray-500 uppercase">Username (Huruf Kecil &amp; Tanpa Spasi)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ani_cashier"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    className="w-full text-xs font-bold bg-white border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-gray-500 uppercase">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Ani Rahmawati"
+                    value={newFullName}
+                    onChange={(e) => setNewFullName(e.target.value)}
+                    className="w-full text-xs font-semibold bg-white border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-gray-500 uppercase">Kata Sandi (Password)</label>
+                    <input
+                      type="password"
+                      placeholder="e.g. cashier123"
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
+                      className="w-full text-xs bg-white border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-brand-primary font-mono"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-gray-500 uppercase">Hak Akses (Role)</label>
+                    <select
+                      value={newUserRole}
+                      onChange={(e) => setNewUserRole(e.target.value as any)}
+                      className="w-full text-xs font-bold bg-white border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-brand-primary h-[34px]"
+                    >
+                      <option value="KASIR">Kasir (POS)</option>
+                      <option value="KITCHEN">Dapur (KDS)</option>
+                      <option value="RUNNER">Runner App</option>
+                      <option value="MANAGEMENT">Management</option>
+                      <option value="SYSADMIN">SysAdmin</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-brand-primary hover:bg-brand-primary-hover text-white font-bold text-xs py-2.5 rounded shadow cursor-pointer transition-all duration-200 flex items-center justify-center gap-1.5"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  Daftarkan Akun Baru
+                </button>
+              </form>
+            </div>
+
+            {/* DAFTAR USER DENGAN BADGE DAN DELETE */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                <h4 className="font-extrabold text-gray-800 text-xs uppercase tracking-wider flex items-center gap-1">
+                  👥 Anggota &amp; Staff Terdaftar ({tenantId === 'solaria' ? 'Solaria' : 'Bakmi GM'})
+                </h4>
+                <span className="text-[10px] text-gray-400 font-semibold">{usersList.length} Akun aktif</span>
+              </div>
+
+              {isUsersLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-2">
+                  <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
+                  <p className="text-xs font-semibold">Mengambil data user...</p>
+                </div>
+              ) : usersList.length === 0 ? (
+                <div className="text-center py-20 text-gray-400">
+                  Belum ada user terdaftar.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                  {usersList.map(user => {
+                    const isActive = useAuthStore.getState().currentUser?.id === user.id;
+                    return (
+                      <div
+                        key={user.id}
+                        className="p-3.5 rounded-brand bg-white border border-gray-100 flex justify-between items-center hover:border-gray-250 shadow-sm transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Profile Avatar Icon */}
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${
+                            user.role === 'SYSADMIN' 
+                              ? 'bg-purple-100 text-purple-700' 
+                              : user.role === 'MANAGEMENT'
+                                ? 'bg-blue-100 text-blue-700'
+                                : user.role === 'KASIR'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : user.role === 'KITCHEN'
+                                    ? 'bg-amber-100 text-amber-700'
+                                    : 'bg-indigo-100 text-indigo-700'
+                          }`}>
+                            {user.name.substring(0, 2).toUpperCase()}
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <h5 className="font-extrabold text-gray-800 text-xs">{user.name}</h5>
+                              {isActive && (
+                                <span className="bg-green-100 text-green-700 font-extrabold text-[8px] px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                  Anda (Aktif)
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[9px] font-mono text-gray-400 font-bold">
+                              <span>@{user.username}</span>
+                              <span>•</span>
+                              <span>ID: {user.id}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5">
+                          <span className={`text-[9px] font-extrabold px-2.5 py-1 rounded-full border tracking-wide uppercase leading-none ${
+                            user.role === 'SYSADMIN' 
+                              ? 'bg-purple-50 text-purple-700 border-purple-200' 
+                              : user.role === 'MANAGEMENT'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : user.role === 'KASIR'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : user.role === 'KITCHEN'
+                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                    : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                          }`}>
+                            {user.role}
+                          </span>
+
+                          <button
+                            onClick={() => handleDeleteUser(user.id, user.username)}
+                            disabled={isActive}
+                            className={`p-2 rounded-full border transition-all duration-200 cursor-pointer shadow-sm flex items-center justify-center ${
+                              isActive 
+                                ? 'bg-gray-50 border-gray-150 text-gray-300 cursor-not-allowed' 
+                                : 'bg-red-50 border-red-200 text-red-500 hover:text-red-700 hover:bg-red-100'
+                            }`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
+        {/* =========================================== */}
+        {/* TAB 4: LAPORAN PENJUALAN (ANALYTICS)        */}
         {/* =========================================== */}
         {activeTab === 'REPORTS' && (
           <div className="space-y-6">

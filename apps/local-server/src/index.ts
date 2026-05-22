@@ -1,8 +1,8 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { Server as SocketIOServer } from 'socket.io';
-import { SQLiteDB } from './db/sqlite.js';
-import { Order, OrderStatus, PaymentStatus, PaymentMethod, MenuItem, TenantConfig } from '@resto-pos/shared-types';
+import { SQLiteDB, hashPassword, verifyPassword } from './db/sqlite.js';
+import { Order, OrderStatus, PaymentStatus, PaymentMethod, MenuItem, TenantConfig, User, UserRole } from '@resto-pos/shared-types';
 
 const PORT = 5000;
 
@@ -293,6 +293,104 @@ fastify.post<{ Body: TenantConfig }>('/api/tenant/custom', async (request, reply
 
   fastify.log.info(`Tenant configuration updated for ${body.tenant_id}`);
   return body;
+});
+
+// --- AUTH & USER MANAGEMENT ENDPOINTS ---
+
+// 11. POST /api/:tenantId/auth/login
+fastify.post<{ Params: { tenantId: string }; Body: { username?: string; password?: string } }>('/api/:tenantId/auth/login', async (request, reply) => {
+  const { tenantId } = request.params;
+  const { username, password } = request.body;
+
+  if (!username || !password) {
+    return reply.status(400).send({ error: 'Username dan password wajib diisi!' });
+  }
+
+  const user = db.getUserByUsername(tenantId, username);
+  if (!user) {
+    return reply.status(401).send({ error: 'Username atau password salah.' });
+  }
+
+  const isValid = verifyPassword(password, user.password_hash);
+  if (!isValid) {
+    return reply.status(401).send({ error: 'Username atau password salah.' });
+  }
+
+  // Generate a mock secure token
+  const token = `mock-token-${user.id}-${Date.now()}`;
+
+  fastify.log.info(`User ${user.username} (${user.role}) logged in successfully for tenant ${tenantId}`);
+
+  return {
+    user: {
+      id: user.id,
+      tenant_id: user.tenant_id,
+      username: user.username,
+      name: user.name,
+      role: user.role
+    },
+    token
+  };
+});
+
+// 12. GET /api/:tenantId/users - List all users in a tenant
+fastify.get<{ Params: { tenantId: string } }>('/api/:tenantId/users', async (request, reply) => {
+  const { tenantId } = request.params;
+  const users = db.getUsers(tenantId);
+  return users;
+});
+
+// 13. POST /api/:tenantId/users - Add a new user
+fastify.post<{ Params: { tenantId: string }; Body: Omit<User, 'id'> & { password?: string } }>('/api/:tenantId/users', async (request, reply) => {
+  const { tenantId } = request.params;
+  const body = request.body;
+
+  if (!body.username || !body.name || !body.role || !body.password) {
+    return reply.status(400).send({ error: 'Mohon isi semua kolom: username, nama lengkap, role, dan password!' });
+  }
+
+  // Check if username is already taken
+  const existingUser = db.getUserByUsername(tenantId, body.username);
+  if (existingUser) {
+    return reply.status(400).send({ error: 'Username ini sudah terpakai!' });
+  }
+
+  const userId = `usr-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const passwordHash = hashPassword(body.password);
+
+  const newUser: User = {
+    id: userId,
+    tenant_id: tenantId,
+    username: body.username,
+    name: body.name,
+    role: body.role as UserRole
+  };
+
+  db.addUser(tenantId, {
+    ...newUser,
+    password_hash: passwordHash
+  });
+
+  // Broadcast user changes to other connected clients
+  io.to(`tenant:${tenantId}`).emit('users:updated');
+
+  fastify.log.info(`New user ${newUser.username} (${newUser.role}) created for tenant ${tenantId}`);
+
+  return { success: true, user: newUser };
+});
+
+// 14. DELETE /api/:tenantId/users/:id - Delete a user
+fastify.delete<{ Params: { tenantId: string; id: string } }>('/api/:tenantId/users/:id', async (request, reply) => {
+  const { tenantId, id } = request.params;
+  
+  db.deleteUser(id);
+
+  // Broadcast user changes to other connected clients
+  io.to(`tenant:${tenantId}`).emit('users:updated');
+
+  fastify.log.info(`User ID ${id} deleted for tenant ${tenantId}`);
+
+  return { success: true };
 });
 
 // Start Fastify server

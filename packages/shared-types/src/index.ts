@@ -88,3 +88,14 @@ export interface Order {
   ready_at?: string;
   delivered_at?: string;
 }
+
+export type UserRole = 'KASIR' | 'KITCHEN' | 'RUNNER' | 'MANAGEMENT' | 'SYSADMIN';
+
+export interface User {
+  id: string;
+  tenant_id: string;
+  username: string;
+  name: string;
+  role: UserRole;
+}
+

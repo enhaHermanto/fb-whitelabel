@@ -1,13 +1,27 @@
 import { DatabaseSync } from 'node:sqlite';
 import * as path from 'path';
 import * as fs from 'fs';
-import { TenantConfig, MenuItem, Order, OrderItem, OrderStatus, PaymentStatus, PaymentMethod } from '@resto-pos/shared-types';
+import * as crypto from 'node:crypto';
+import { TenantConfig, MenuItem, Order, OrderItem, OrderStatus, PaymentStatus, PaymentMethod, User, UserRole } from '@resto-pos/shared-types';
 
 const DB_DIR = path.resolve(process.cwd(), 'data');
 if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
 }
 const DB_PATH = path.join(DB_DIR, 'pos.db');
+
+export function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+
+export function verifyPassword(password: string, storedHash: string): boolean {
+  const [salt, key] = storedHash.split(':');
+  if (!salt || !key) return false;
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return hash === key;
+}
 
 export class SQLiteDB {
   private db: DatabaseSync;
@@ -27,6 +41,19 @@ export class SQLiteDB {
         branding TEXT NOT NULL,
         feature_flags TEXT NOT NULL,
         receipt TEXT NOT NULL
+      )
+    `);
+
+    // Users Table
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        username TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        FOREIGN KEY (tenant_id) REFERENCES tenant_configs(tenant_id)
       )
     `);
 
@@ -235,6 +262,39 @@ export class SQLiteDB {
         item.description || '',
         item.image_url || '',
         item.available ? '1' : '0'
+      );
+    }
+
+    // Seed Users (10 users total)
+    const defaultUsers = [
+      // Solaria Users
+      { id: 'u-sol-admin', tenant_id: 'solaria', username: 'solaria_admin', name: 'Solaria Admin', role: 'SYSADMIN', password: 'admin' },
+      { id: 'u-sol-cashier', tenant_id: 'solaria', username: 'solaria_cashier', name: 'Ani Rahmawati', role: 'KASIR', password: 'cashier' },
+      { id: 'u-sol-kitchen', tenant_id: 'solaria', username: 'solaria_kitchen', name: 'Budi Chef', role: 'KITCHEN', password: 'kitchen' },
+      { id: 'u-sol-runner', tenant_id: 'solaria', username: 'solaria_runner', name: 'Candra Runner', role: 'RUNNER', password: 'runner' },
+      { id: 'u-sol-manager', tenant_id: 'solaria', username: 'solaria_manager', name: 'Dewi Manager', role: 'MANAGEMENT', password: 'manager' },
+
+      // Bakmi GM Users
+      { id: 'u-gm-admin', tenant_id: 'bakmigm', username: 'gm_admin', name: 'GM Admin', role: 'SYSADMIN', password: 'admin' },
+      { id: 'u-gm-cashier', tenant_id: 'bakmigm', username: 'gm_cashier', name: 'Eka Rahayu', role: 'KASIR', password: 'cashier' },
+      { id: 'u-gm-kitchen', tenant_id: 'bakmigm', username: 'gm_kitchen', name: 'Fajar Chef', role: 'KITCHEN', password: 'kitchen' },
+      { id: 'u-gm-runner', tenant_id: 'bakmigm', username: 'gm_runner', name: 'Gita Runner', role: 'RUNNER', password: 'runner' },
+      { id: 'u-gm-manager', tenant_id: 'bakmigm', username: 'gm_manager', name: 'Hadi Manager', role: 'MANAGEMENT', password: 'manager' }
+    ];
+
+    const insertUser = this.db.prepare(`
+      INSERT OR IGNORE INTO users (id, tenant_id, username, name, role, password_hash)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    for (const u of defaultUsers) {
+      insertUser.run(
+        u.id,
+        u.tenant_id,
+        u.username,
+        u.name,
+        u.role,
+        hashPassword(u.password)
       );
     }
 
@@ -463,5 +523,54 @@ export class SQLiteDB {
       JSON.stringify(config.feature_flags),
       JSON.stringify(config.receipt)
     );
+  }
+
+  // --- User Authentication & Management Methods ---
+
+  public getUserByUsername(tenantId: string, username: string): (User & { password_hash: string }) | null {
+    const query = this.db.prepare('SELECT * FROM users WHERE tenant_id = ? AND username = ?');
+    const result = query.all(tenantId, username) as any[];
+    if (result.length === 0) return null;
+    const row = result[0];
+    return {
+      id: row.id,
+      tenant_id: row.tenant_id,
+      username: row.username,
+      name: row.name,
+      role: row.role as UserRole,
+      password_hash: row.password_hash
+    };
+  }
+
+  public getUsers(tenantId: string): User[] {
+    const query = this.db.prepare('SELECT id, tenant_id, username, name, role FROM users WHERE tenant_id = ? ORDER BY name ASC');
+    const rows = query.all(tenantId) as any[];
+    return rows.map(row => ({
+      id: row.id,
+      tenant_id: row.tenant_id,
+      username: row.username,
+      name: row.name,
+      role: row.role as UserRole
+    }));
+  }
+
+  public addUser(tenantId: string, user: User & { password_hash: string }): void {
+    const insert = this.db.prepare(`
+      INSERT INTO users (id, tenant_id, username, name, role, password_hash)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    insert.run(
+      user.id,
+      tenantId,
+      user.username,
+      user.name,
+      user.role,
+      user.password_hash
+    );
+  }
+
+  public deleteUser(userId: string): void {
+    const del = this.db.prepare('DELETE FROM users WHERE id = ?');
+    del.run(userId);
   }
 }
