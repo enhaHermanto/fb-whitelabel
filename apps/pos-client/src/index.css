@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: var(--color-primary);
+  --color-brand-primary-hover: var(--color-primary-hover);
+  --color-brand-secondary: var(--color-secondary);
+  --color-brand-background: var(--color-background);
+  --color-brand-surface: var(--color-surface);
+  --color-brand-text-primary: var(--color-text-primary);
+  --color-brand-text-secondary: var(--color-text-secondary);
+  --color-brand-accent: var(--color-accent);
+  --color-brand-error: var(--color-error);
+  --color-brand-success: var(--color-success);
+  --radius-brand: var(--border-radius);
+}
+
+/* Fallback initial theme (Solaria) */
+:root {
+  --color-primary: #E63946;
+  --color-primary-hover: #C1121F;
+  --color-secondary: #F1FAEE;
+  --color-background: #F3F4F6; /* light gray overall body */
+  --color-surface: #FFFFFF;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #4B5563;
+  --color-accent: #3B82F6;
+  --color-error: #EF4444;
+  --color-success: #10B981;
+  --font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  --border-radius: 12px;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar for Kitchen Kanban & Order lists */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+/* Custom animations for dynamic feel */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--color-primary);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--color-primary);
+  }
+}
+
+.glow-active {
+  animation: pulseGlow 2s infinite;
+}
