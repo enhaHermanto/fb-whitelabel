@@ -98,7 +98,7 @@ export const CashierView: React.FC = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-6 h-full p-2 min-h-0">
+    <div className="grid lg:grid-cols-3 gap-6 h-full p-2 min-h-0 overflow-hidden">
       {/* Category & Menu Section */}
       <div className="lg:col-span-2 flex flex-col h-full space-y-4 min-h-0">
         {/* Category Selector */}

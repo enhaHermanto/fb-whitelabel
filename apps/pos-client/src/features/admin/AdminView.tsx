@@ -305,7 +305,7 @@ export const AdminView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 p-2">
+    <div className="max-w-5xl mx-auto space-y-6 p-2 h-full overflow-y-auto">
       {/* Visual Welcome Banner */}
       <div className="bg-gradient-to-r from-brand-primary to-brand-primary/80 rounded-brand text-white p-6 shadow-md relative overflow-hidden transition-all duration-300">
         <div className="relative z-10 space-y-2">
