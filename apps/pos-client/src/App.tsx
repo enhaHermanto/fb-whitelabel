@@ -53,12 +53,12 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col transition-all duration-300">
+    <div className="h-screen bg-gray-50 flex flex-col transition-all duration-300 overflow-hidden">
       {/* Shared Premium Header */}
       <Header currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       {/* Main View Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 overflow-hidden">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col min-h-0 overflow-hidden">
         {/* Global Loading Overlay */}
         {isLoading && (
           <div className="fixed inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 animate-in fade-in duration-200">
@@ -80,8 +80,8 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Tab switcher */}
-        <div className="h-full">
+        {/* Tab switcher wrapper */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
           {currentTab === 'CASHIER' && <CashierView />}
           {currentTab === 'KITCHEN' && <KitchenView />}
           {currentTab === 'RUNNER' && <RunnerView />}

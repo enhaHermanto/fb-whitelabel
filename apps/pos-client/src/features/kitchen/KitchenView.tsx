@@ -92,7 +92,7 @@ export const KitchenView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] space-y-4 p-2">
+    <div className="flex flex-col h-full space-y-4 p-2 min-h-0">
       {/* Kitchen status bar */}
       <div className="bg-white rounded-brand border border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">

@@ -98,9 +98,9 @@ export const CashierView: React.FC = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-6 h-[calc(100vh-140px)] p-2">
+    <div className="grid lg:grid-cols-3 gap-6 h-full p-2 min-h-0">
       {/* Category & Menu Section */}
-      <div className="lg:col-span-2 flex flex-col h-full space-y-4">
+      <div className="lg:col-span-2 flex flex-col h-full space-y-4 min-h-0">
         {/* Category Selector */}
         <div className="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200">
           {[
@@ -128,7 +128,7 @@ export const CashierView: React.FC = () => {
         </div>
 
         {/* Menu Grid */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 md:grid-cols-3 gap-4 content-start">
           {filteredMenu.map(item => (
             <div
               key={item.id}
@@ -214,7 +214,7 @@ export const CashierView: React.FC = () => {
       </div>
 
       {/* Cart & Checkout Section */}
-      <div className="bg-white rounded-brand border border-gray-200 p-4 shadow-sm flex flex-col h-full">
+      <div className="bg-white rounded-brand border border-gray-200 p-4 shadow-sm flex flex-col h-full min-h-0">
         {/* Cart Header */}
         <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
           <div className="flex items-center gap-2">
