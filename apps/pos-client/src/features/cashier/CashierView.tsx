@@ -135,7 +135,7 @@ export const CashierView: React.FC = () => {
               className="bg-white rounded-brand border border-gray-150 shadow-sm flex flex-col justify-between hover:border-brand-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden group"
             >
               {/* Product Image Area */}
-              <div className="h-28 w-full bg-gray-50 overflow-hidden relative border-b border-gray-100 flex items-center justify-center">
+              <div className="w-full aspect-square bg-gray-50 overflow-hidden relative border-b border-gray-100 flex items-center justify-center">
                 {item.image_url ? (
                   <img
                     src={item.image_url}
