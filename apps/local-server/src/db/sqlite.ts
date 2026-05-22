@@ -100,6 +100,11 @@ export class SQLiteDB {
       console.log('SQLiteDB: Migrated order_items table - added delivery_type column.');
     } catch (e) {}
 
+    try {
+      this.db.exec(`ALTER TABLE menu_items ADD COLUMN image_url TEXT`);
+      console.log('SQLiteDB: Migrated menu_items table - added image_url column.');
+    } catch (e) {}
+
     console.log('SQLiteDB: Schema successfully initialized or verified.');
   }
 
