@@ -127,8 +127,10 @@ export const CashierView: React.FC = () => {
           })}
         </div>
 
-        {/* Menu Grid */}
-        <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 md:grid-cols-3 gap-4 content-start">
+        {/* Menu Grid Container (Scrollable) */}
+        <div className="flex-1 overflow-y-auto pr-1">
+          {/* Menu Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {filteredMenu.map(item => (
             <div
               key={item.id}
@@ -210,6 +212,7 @@ export const CashierView: React.FC = () => {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
 
