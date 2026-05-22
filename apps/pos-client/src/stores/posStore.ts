@@ -199,10 +199,11 @@ export const usePOSStore = create<POSState>((set, get) => ({
       
       set({ cart: [], tableNumber: '', isLoading: false });
       
-      // Update local orders list instantly
-      set((state) => ({
-        orders: [submittedOrder, ...state.orders]
-      }));
+      // Update local orders list instantly, checking for duplicates to avoid race conditions with WebSockets
+      set((state) => {
+        if (state.orders.some((o) => o.id === submittedOrder.id)) return {};
+        return { orders: [submittedOrder, ...state.orders] };
+      });
 
       return submittedOrder;
     } catch (err: any) {
