@@ -32,6 +32,7 @@ export const AdminView: React.FC = () => {
   const [newPrice, setNewPrice] = useState<number | ''>('');
   const [newCategory, setNewCategory] = useState<'FOOD' | 'BEVERAGE' | 'SNACK'>('FOOD');
   const [newDesc, setNewDesc] = useState('');
+  const [newImageUrl, setNewImageUrl] = useState('');
 
   // --- REPORTS STATE ---
   const [reportData, setReportData] = useState<any>(null);
@@ -132,13 +133,15 @@ export const AdminView: React.FC = () => {
         name: newName,
         price: Number(newPrice),
         category: newCategory,
-        description: newDesc
+        description: newDesc,
+        image_url: newImageUrl
       });
       alert(`Sukses menambahkan menu baru: ${newName}!`);
       setNewCode('');
       setNewName('');
       setNewPrice('');
       setNewDesc('');
+      setNewImageUrl('');
     } catch (err) {
       alert('Gagal menambahkan menu baru.');
     }
@@ -491,9 +494,55 @@ export const AdminView: React.FC = () => {
                     placeholder="Deskripsi singkat hidangan..."
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
-                    className="w-full text-xs bg-white border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-brand-primary h-16 resize-none"
+                    className="w-full text-xs bg-white border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-brand-primary h-14 resize-none"
                   />
                 </div>
+                
+                {/* Image upload and url */}
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-gray-500 uppercase block">Gambar Menu (URL / Upload)</label>
+                  {newImageUrl && (
+                    <div className="relative w-full h-20 rounded border border-gray-200 overflow-hidden mb-1">
+                      <img src={newImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setNewImageUrl('')}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-[8px] font-bold hover:bg-red-600 shadow-sm cursor-pointer"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="URL Gambar..."
+                      value={newImageUrl.startsWith('data:') ? 'Local Image (Base64)' : newImageUrl}
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      disabled={newImageUrl.startsWith('data:')}
+                      className="flex-1 text-[10px] bg-white border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-brand-primary font-mono"
+                    />
+                    <label className="bg-brand-primary hover:bg-brand-primary-hover text-white text-[9px] font-bold px-2.5 py-1.5 rounded shadow cursor-pointer transition-all duration-200 flex items-center justify-center whitespace-nowrap">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setNewImageUrl(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 <button
                   type="submit"
                   className="w-full bg-brand-primary hover:bg-brand-primary-hover text-white font-bold text-xs py-2.5 rounded shadow cursor-pointer transition-all duration-200"
@@ -516,22 +565,35 @@ export const AdminView: React.FC = () => {
                 {menu.map(item => (
                   <div
                     key={item.id}
-                    className={`p-3.5 rounded-brand border flex justify-between items-center transition-all duration-200 ${
+                    className={`p-3 rounded-brand border flex justify-between items-center transition-all duration-200 ${
                       item.available
                         ? 'bg-white border-gray-100 hover:border-gray-200'
                         : 'bg-gray-50 border-gray-200 opacity-70'
                     }`}
                   >
-                    <div className="space-y-1 pr-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-extrabold text-brand-primary font-mono uppercase tracking-wider bg-brand-secondary px-1.5 py-0.5 rounded">
-                          {item.code}
-                        </span>
-                        <h5 className="font-bold text-gray-800 text-xs">{item.name}</h5>
+                    <div className="flex items-center gap-3">
+                      {/* Image Thumbnail */}
+                      <div className="w-12 h-12 rounded bg-gray-100 overflow-hidden flex-shrink-0 relative border border-gray-100">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-brand-primary/40 bg-brand-primary/5">
+                            <Sparkles className="w-5 h-5" />
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[10px] text-gray-500 line-clamp-1">{item.description || 'Tidak ada deskripsi.'}</p>
-                      <div className="text-xs font-extrabold text-brand-primary">
-                        Rp {item.price.toLocaleString('id-ID')}
+
+                      <div className="space-y-0.5 pr-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-extrabold text-brand-primary font-mono uppercase tracking-wider bg-brand-secondary px-1.5 py-0.5 rounded">
+                            {item.code}
+                          </span>
+                          <h5 className="font-bold text-gray-800 text-xs">{item.name}</h5>
+                        </div>
+                        <p className="text-[10px] text-gray-500 line-clamp-1">{item.description || 'Tidak ada deskripsi.'}</p>
+                        <div className="text-xs font-extrabold text-brand-primary">
+                          Rp {item.price.toLocaleString('id-ID')}
+                        </div>
                       </div>
                     </div>
 

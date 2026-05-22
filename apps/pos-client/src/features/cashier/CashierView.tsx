@@ -132,59 +132,80 @@ export const CashierView: React.FC = () => {
           {filteredMenu.map(item => (
             <div
               key={item.id}
-              className="bg-white rounded-brand border border-gray-100 p-4 shadow-sm flex flex-col justify-between hover:border-brand-primary/30 hover:shadow transition-all duration-200"
+              className="bg-white rounded-brand border border-gray-150 shadow-sm flex flex-col justify-between hover:border-brand-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden group"
             >
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold tracking-widest text-brand-primary uppercase">
-                  {item.code}
+              {/* Product Image Area */}
+              <div className="h-28 w-full bg-gray-50 overflow-hidden relative border-b border-gray-100 flex items-center justify-center">
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-brand-primary/5 text-brand-primary/45">
+                    <Utensils className="w-8 h-8" />
+                  </div>
+                )}
+                {/* Category Badge over Image */}
+                <span className="absolute top-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                  {item.category}
                 </span>
-                <h4 className="font-bold text-gray-800 text-sm line-clamp-1">{item.name}</h4>
-                <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed h-8">
-                  {item.description || 'Tidak ada deskripsi.'}
-                </p>
               </div>
 
-              <div className="space-y-3 pt-3 mt-3 border-t border-gray-50">
-                {/* Note Trigger */}
-                <div className="relative">
-                  {activeNotesItem === item.id ? (
-                    <div className="absolute bottom-10 left-0 right-0 bg-white p-2 rounded-lg border border-gray-200 shadow-lg z-10 flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Pedas, manis, es dikit..."
-                        value={customNotes[item.id] || ''}
-                        onChange={(e) => setCustomNotes({ ...customNotes, [item.id]: e.target.value })}
-                        className="text-xs border border-gray-200 rounded p-1 flex-1 focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => setActiveNotesItem(null)}
-                        className="bg-brand-primary text-white text-[10px] px-2 rounded font-bold"
-                      >
-                        OK
-                      </button>
-                    </div>
-                  ) : null}
-
-                  <button
-                    onClick={() => setActiveNotesItem(item.id)}
-                    className="flex items-center gap-1 text-[10px] text-brand-text-secondary hover:text-brand-primary font-semibold"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5 text-brand-primary" />
-                    {customNotes[item.id] ? `Catatan: ${customNotes[item.id]}` : '+ Catatan Item'}
-                  </button>
+              <div className="p-3.5 flex-1 flex flex-col justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold tracking-widest text-brand-primary uppercase">
+                    {item.code}
+                  </span>
+                  <h4 className="font-bold text-gray-800 text-sm line-clamp-1">{item.name}</h4>
+                  <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed h-8">
+                    {item.description || 'Tidak ada deskripsi.'}
+                  </p>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="font-extrabold text-sm text-brand-primary">
-                    Rp {item.price.toLocaleString('id-ID')}
-                  </span>
-                  <button
-                    onClick={() => handleAddToCart(item)}
-                    className="bg-brand-primary text-white font-bold text-xs px-3.5 py-1.5 rounded-full hover:bg-brand-primary-hover shadow-sm transition-all duration-200 cursor-pointer"
-                  >
-                    Tambah
-                  </button>
+                <div className="space-y-3 pt-3 mt-3 border-t border-gray-50">
+                  {/* Note Trigger */}
+                  <div className="relative">
+                    {activeNotesItem === item.id ? (
+                      <div className="absolute bottom-10 left-0 right-0 bg-white p-2 rounded-lg border border-gray-200 shadow-lg z-10 flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Pedas, manis, es dikit..."
+                          value={customNotes[item.id] || ''}
+                          onChange={(e) => setCustomNotes({ ...customNotes, [item.id]: e.target.value })}
+                          className="text-xs border border-gray-200 rounded p-1 flex-1 focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => setActiveNotesItem(null)}
+                          className="bg-brand-primary text-white text-[10px] px-2 rounded font-bold cursor-pointer"
+                        >
+                          OK
+                        </button>
+                      </div>
+                    ) : null}
+
+                    <button
+                      onClick={() => setActiveNotesItem(item.id)}
+                      className="flex items-center gap-1 text-[10px] text-brand-text-secondary hover:text-brand-primary font-semibold cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-brand-primary" />
+                      {customNotes[item.id] ? `Catatan: ${customNotes[item.id]}` : '+ Catatan Item'}
+                    </button>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-extrabold text-sm text-brand-primary">
+                      Rp {item.price.toLocaleString('id-ID')}
+                    </span>
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      className="bg-brand-primary text-white font-bold text-xs px-3.5 py-1.5 rounded-full hover:bg-brand-primary-hover shadow-sm transition-all duration-200 cursor-pointer"
+                    >
+                      Tambah
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

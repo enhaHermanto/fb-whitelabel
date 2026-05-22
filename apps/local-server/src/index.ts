@@ -169,6 +169,7 @@ fastify.post<{ Params: { tenantId: string }; Body: Omit<MenuItem, 'id' | 'availa
     price: Number(body.price),
     category: body.category as any,
     description: body.description || '',
+    image_url: body.image_url || '',
     available: true
   };
 

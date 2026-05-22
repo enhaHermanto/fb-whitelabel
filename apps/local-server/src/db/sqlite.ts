@@ -198,24 +198,24 @@ export class SQLiteDB {
     // Seed Menu Items
     const menuItems: MenuItem[] = [
       // Solaria Menu
-      { id: 'sol-01', code: 'A01', name: 'Nasi Goreng Spesial', price: 35000, category: 'FOOD', description: 'Nasi goreng lezat khas Solaria dengan bakso ikan, ayam, telur mata sapi, dan kerupuk.', available: true },
-      { id: 'sol-02', code: 'A02', name: 'Kwetiau Siram Ayam', price: 38000, category: 'FOOD', description: 'Kwetiau basah disiram kuah kental gurih lengkap dengan potongan ayam, sayuran segar, dan telur.', available: true },
-      { id: 'sol-03', code: 'A03', name: 'Chicken Cordon Bleu', price: 45000, category: 'FOOD', description: 'Dada ayam gulung isi keju mozarella dan smoked beef goreng tepung roti gurih.', available: true },
-      { id: 'sol-04', code: 'D01', name: 'Es Teh Manis', price: 12000, category: 'BEVERAGE', description: 'Es teh manis segar pelepas dahaga.', available: true },
-      { id: 'sol-05', code: 'D02', name: 'Jus Alpukat', price: 22000, category: 'BEVERAGE', description: 'Jus buah alpukat segar kental dengan saus cokelat manis.', available: true },
-      { id: 'sol-06', code: 'S01', name: 'Kentang Goreng', price: 18000, category: 'SNACK', description: 'Kentang goreng renyah bumbu garam gurih.', available: true },
+      { id: 'sol-01', code: 'A01', name: 'Nasi Goreng Spesial', price: 35000, category: 'FOOD', description: 'Nasi goreng lezat khas Solaria dengan bakso ikan, ayam, telur mata sapi, dan kerupuk.', image_url: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'sol-02', code: 'A02', name: 'Kwetiau Siram Ayam', price: 38000, category: 'FOOD', description: 'Kwetiau basah disiram kuah kental gurih lengkap dengan potongan ayam, sayuran segar, dan telur.', image_url: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'sol-03', code: 'A03', name: 'Chicken Cordon Bleu', price: 45000, category: 'FOOD', description: 'Dada ayam gulung isi keju mozarella dan smoked beef goreng tepung roti gurih.', image_url: 'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'sol-04', code: 'D01', name: 'Es Teh Manis', price: 12000, category: 'BEVERAGE', description: 'Es teh manis segar pelepas dahaga.', image_url: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'sol-05', code: 'D02', name: 'Jus Alpukat', price: 22000, category: 'BEVERAGE', description: 'Jus buah alpukat segar kental dengan saus cokelat manis.', image_url: 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'sol-06', code: 'S01', name: 'Kentang Goreng', price: 18000, category: 'SNACK', description: 'Kentang goreng renyah bumbu garam gurih.', image_url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&auto=format&fit=crop&q=60', available: true },
 
       // Bakmi GM Menu
-      { id: 'gm-01', code: 'B01', name: 'Bakmi Spesial GM', price: 34000, category: 'FOOD', description: 'Bakmi lembut legendaris disajikan dengan potongan ayam jamur kecap gurih.', available: true },
-      { id: 'gm-02', code: 'B02', name: 'Bakmi Ayam Saus Thai', price: 36000, category: 'FOOD', description: 'Bakmi GM dengan topping ayam goreng renyah disiram saus khas Thailand asam pedas.', available: true },
-      { id: 'gm-03', code: 'B03', name: 'Pangsit Goreng (5 pcs)', price: 21000, category: 'SNACK', description: 'Pangsit goreng legendaris Bakmi GM yang renyah dengan saus merah manis khas.', available: true },
-      { id: 'gm-04', code: 'GD01', name: 'Es Teh Manis GM', price: 10000, category: 'BEVERAGE', description: 'Es teh manis segar aroma melati khas GM.', available: true },
-      { id: 'gm-05', code: 'GD02', name: 'Es Green Tea Lychee', price: 18000, category: 'BEVERAGE', description: 'Es teh hijau dingin rasa buah leci menyegarkan.', available: true }
+      { id: 'gm-01', code: 'B01', name: 'Bakmi Spesial GM', price: 34000, category: 'FOOD', description: 'Bakmi lembut legendaris disajikan dengan potongan ayam jamur kecap gurih.', image_url: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'gm-02', code: 'B02', name: 'Bakmi Ayam Saus Thai', price: 36000, category: 'FOOD', description: 'Bakmi GM dengan topping ayam goreng renyah disiram saus khas Thailand asam pedas.', image_url: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'gm-03', code: 'B03', name: 'Pangsit Goreng (5 pcs)', price: 21000, category: 'SNACK', description: 'Pangsit goreng legendaris Bakmi GM yang renyah dengan saus merah manis khas.', image_url: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'gm-04', code: 'GD01', name: 'Es Teh Manis GM', price: 10000, category: 'BEVERAGE', description: 'Es teh manis segar aroma melati khas GM.', image_url: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'gm-05', code: 'GD02', name: 'Es Green Tea Lychee', price: 18000, category: 'BEVERAGE', description: 'Es teh hijau dingin rasa buah leci menyegarkan.', image_url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&auto=format&fit=crop&q=60', available: true }
     ];
 
     const insertMenu = this.db.prepare(`
-      INSERT OR REPLACE INTO menu_items (id, tenant_id, code, name, price, category, description, available)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO menu_items (id, tenant_id, code, name, price, category, description, image_url, available)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     for (const item of menuItems) {
@@ -228,6 +228,7 @@ export class SQLiteDB {
         item.price.toString(),
         item.category,
         item.description || '',
+        item.image_url || '',
         item.available ? '1' : '0'
       );
     }
@@ -261,6 +262,7 @@ export class SQLiteDB {
       price: Number(row.price),
       category: row.category as any,
       description: row.description,
+      image_url: row.image_url || undefined,
       available: row.available === 1
     }));
   }
@@ -417,8 +419,8 @@ export class SQLiteDB {
 
   public addMenuItem(tenantId: string, item: MenuItem): void {
     const insert = this.db.prepare(`
-      INSERT INTO menu_items (id, tenant_id, code, name, price, category, description, available)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO menu_items (id, tenant_id, code, name, price, category, description, image_url, available)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     insert.run(
       item.id,
@@ -428,6 +430,7 @@ export class SQLiteDB {
       item.price.toString(),
       item.category,
       item.description || '',
+      item.image_url || '',
       item.available ? 1 : 0
     );
   }
