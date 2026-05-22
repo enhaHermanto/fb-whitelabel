@@ -341,8 +341,7 @@ export const usePOSStore = create<POSState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await fetch(`${API_URL}/api/${tenantId}/menu/${id}/toggle`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
+        method: 'PATCH'
       });
       if (!res.ok) throw new Error('Failed to toggle menu item availability');
       set({ isLoading: false });
