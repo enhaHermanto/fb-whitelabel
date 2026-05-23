@@ -375,32 +375,34 @@ export const AdminView: React.FC = () => {
         </div>
       </div>
 
-      {/* Brand Switcher Pills */}
-      <div className="flex gap-3 bg-white p-2.5 rounded-brand border border-gray-200 shadow-sm items-center flex-wrap">
-        <span className="text-[10px] font-black text-slate-400 uppercase px-2 tracking-widest">Demo Sandbox:</span>
-        <div className="flex gap-2 flex-wrap">
-          {[
-            { id: 'moroseneng', label: 'Moroseneng 🟢 Basic', plan: 'BASIC' },
-            { id: 'ingkung-rahtawu', label: 'Ingkung Rahtawu 🔵 Premium', plan: 'PREMIUM' },
-            { id: 'deko-cafe', label: 'Deko Cafe 🔵 Premium', plan: 'PREMIUM' },
-            { id: 'solaria', label: 'Solaria 🔵 Premium', plan: 'PREMIUM' },
-            { id: 'bakmigm', label: 'Bakmi GM 🟣 Enterprise', plan: 'ENTERPRISE' }
-          ].map(tenant => (
-            <button
-              key={tenant.id}
-              onClick={() => handleSwitchTenant(tenant.id)}
-              className={`text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full border transition-all duration-200 cursor-pointer ${
-                tenantId === tenant.id
-                  ? 'bg-brand-primary text-white shadow border-brand-primary'
-                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-350 hover:bg-slate-100'
-              }`}
-            >
-              {tenant.label}
-            </button>
-          ))}
+      {/* Brand Switcher Pills - Only visible on the fandb master hub */}
+      {window.location.hostname.split('.')[0] === 'fandb' && (
+        <div className="flex gap-3 bg-white p-2.5 rounded-brand border border-gray-200 shadow-sm items-center flex-wrap">
+          <span className="text-[10px] font-black text-slate-400 uppercase px-2 tracking-widest">Demo Sandbox:</span>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { id: 'moroseneng', label: 'Moroseneng 🟢 Basic', plan: 'BASIC' },
+              { id: 'ingkung-rahtawu', label: 'Ingkung Rahtawu 🔵 Premium', plan: 'PREMIUM' },
+              { id: 'deko-cafe', label: 'Deko Cafe 🔵 Premium', plan: 'PREMIUM' },
+              { id: 'solaria', label: 'Solaria 🔵 Premium', plan: 'PREMIUM' },
+              { id: 'bakmigm', label: 'Bakmi GM 🟣 Enterprise', plan: 'ENTERPRISE' }
+            ].map(tenant => (
+              <button
+                key={tenant.id}
+                onClick={() => handleSwitchTenant(tenant.id)}
+                className={`text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full border transition-all duration-200 cursor-pointer ${
+                  tenantId === tenant.id
+                    ? 'bg-brand-primary text-white shadow border-brand-primary'
+                    : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-350 hover:bg-slate-100'
+                }`}
+              >
+                {tenant.label}
+              </button>
+            ))}
+          </div>
+          {isLoading && <Loader2 className="w-4 h-4 text-brand-primary animate-spin ml-2" />}
         </div>
-        {isLoading && <Loader2 className="w-4 h-4 text-brand-primary animate-spin ml-2" />}
-      </div>
+      )}
 
       {/* PREMIUM TABS CONTROLLER */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2 bg-gray-100 p-1.5 rounded-brand border border-gray-200">

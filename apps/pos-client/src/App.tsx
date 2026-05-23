@@ -38,7 +38,8 @@ const App: React.FC = () => {
         firstPart !== 'www' && 
         firstPart !== '127' && 
         firstPart !== '10' && 
-        firstPart !== 'sign-in'
+        firstPart !== 'sign-in' &&
+        firstPart !== 'fandb'
       ) {
         initialTenant = firstPart;
       }

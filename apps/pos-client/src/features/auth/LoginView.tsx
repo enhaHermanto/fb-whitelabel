@@ -43,7 +43,11 @@ export const LoginView: React.FC = () => {
     }
   };
 
-  // Quick credentials helper buttons
+  // Detect if on fandb master subdomain
+  const isMasterSubdomain = window.location.hostname.split('.')[0] === 'fandb';
+  const plan = tenantConfig?.subscription_plan || 'BASIC';
+
+  // Build credentials helper buttons dynamically
   const credentialsHelpers = [
     { 
       label: 'Kasir', 
@@ -77,30 +81,38 @@ export const LoginView: React.FC = () => {
       pass: 'runner', 
       role: 'RUNNER', 
       color: 'indigo' 
-    },
-    { 
-      label: 'Manager', 
-      user: tenantId === 'moroseneng' 
-        ? 'moroseneng_admin' 
-        : tenantId === 'ingkung-rahtawu' 
-          ? 'rahtawu_admin' 
-          : 'deko_admin', 
-      pass: 'admin', 
-      role: 'MANAGEMENT', 
-      color: 'blue' 
-    },
-    { 
-      label: 'SysAdmin', 
-      user: tenantId === 'moroseneng' 
-        ? 'moroseneng_admin' 
-        : tenantId === 'ingkung-rahtawu' 
-          ? 'rahtawu_admin' 
-          : 'deko_admin', 
-      pass: 'admin', 
-      role: 'SYSADMIN', 
-      color: 'purple' 
     }
   ];
+
+  // Admin role helper is shown only for premium/enterprise plans or on the fandb master hub
+  if (isMasterSubdomain || plan !== 'BASIC') {
+    credentialsHelpers.push({
+      label: 'Admin',
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_admin' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_admin' 
+          : 'deko_admin',
+      pass: 'admin',
+      role: 'SYSADMIN',
+      color: 'purple'
+    });
+  }
+
+  // SysAdmin role helper is exclusively shown on the fandb master subdomain
+  if (isMasterSubdomain) {
+    credentialsHelpers.push({
+      label: 'SysAdmin',
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_admin' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_admin' 
+          : 'deko_admin',
+      pass: 'admin',
+      role: 'SYSADMIN',
+      color: 'blue'
+    });
+  }
 
   const handleFillCredentials = (user: string, pass: string) => {
     setUsername(user);
@@ -163,42 +175,44 @@ export const LoginView: React.FC = () => {
           </div>
         </div>
 
-        {/* Tenant Selector Segmented Pill */}
-        <div className="bg-gray-150/80 backdrop-blur rounded-full p-1 border border-gray-200/50 shadow-inner flex gap-1">
-          <button
-            type="button"
-            onClick={() => handleTenantChange('moroseneng')}
-            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
-              tenantId === 'moroseneng'
-                ? 'bg-brand-primary text-white shadow-md'
-                : 'text-gray-500 hover:text-brand-primary'
-            }`}
-          >
-            MOROSENENG
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTenantChange('ingkung-rahtawu')}
-            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
-              tenantId === 'ingkung-rahtawu'
-                ? 'bg-brand-primary text-white shadow-md'
-                : 'text-gray-500 hover:text-brand-primary'
-            }`}
-          >
-            INGKUNG
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTenantChange('deko-cafe')}
-            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
-              tenantId === 'deko-cafe'
-                ? 'bg-brand-primary text-white shadow-md'
-                : 'text-gray-500 hover:text-brand-primary'
-            }`}
-          >
-            DEKO CAFE
-          </button>
-        </div>
+        {/* Tenant Selector Segmented Pill - Only visible on the fandb master hub */}
+        {isMasterSubdomain && (
+          <div className="bg-gray-150/80 backdrop-blur rounded-full p-1 border border-gray-200/50 shadow-inner flex gap-1">
+            <button
+              type="button"
+              onClick={() => handleTenantChange('moroseneng')}
+              className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
+                tenantId === 'moroseneng'
+                  ? 'bg-brand-primary text-white shadow-md'
+                  : 'text-gray-500 hover:text-brand-primary'
+              }`}
+            >
+              MOROSENENG
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTenantChange('ingkung-rahtawu')}
+              className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
+                tenantId === 'ingkung-rahtawu'
+                  ? 'bg-brand-primary text-white shadow-md'
+                  : 'text-gray-500 hover:text-brand-primary'
+              }`}
+            >
+              INGKUNG
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTenantChange('deko-cafe')}
+              className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
+                tenantId === 'deko-cafe'
+                  ? 'bg-brand-primary text-white shadow-md'
+                  : 'text-gray-500 hover:text-brand-primary'
+              }`}
+            >
+              DEKO CAFE
+            </button>
+          </div>
+        )}
 
         {/* Action Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
