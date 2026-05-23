@@ -45,11 +45,61 @@ export const LoginView: React.FC = () => {
 
   // Quick credentials helper buttons
   const credentialsHelpers = [
-    { label: 'Kasir', user: `${tenantId === 'solaria' ? 'solaria_cashier' : 'gm_cashier'}`, pass: 'cashier', role: 'KASIR', color: 'emerald' },
-    { label: 'Kitchen', user: `${tenantId === 'solaria' ? 'solaria_kitchen' : 'gm_kitchen'}`, pass: 'kitchen', role: 'KITCHEN', color: 'amber' },
-    { label: 'Runner', user: `${tenantId === 'solaria' ? 'solaria_runner' : 'gm_runner'}`, pass: 'runner', role: 'RUNNER', color: 'indigo' },
-    { label: 'Manager', user: `${tenantId === 'solaria' ? 'solaria_manager' : 'gm_manager'}`, pass: 'manager', role: 'MANAGEMENT', color: 'blue' },
-    { label: 'SysAdmin', user: `${tenantId === 'solaria' ? 'solaria_admin' : 'gm_admin'}`, pass: 'admin', role: 'SYSADMIN', color: 'purple' }
+    { 
+      label: 'Kasir', 
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_cashier' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_cashier' 
+          : 'deko_cashier', 
+      pass: 'cashier', 
+      role: 'KASIR', 
+      color: 'emerald' 
+    },
+    { 
+      label: 'Kitchen', 
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_kitchen' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_kitchen' 
+          : 'deko_kitchen', 
+      pass: 'kitchen', 
+      role: 'KITCHEN', 
+      color: 'amber' 
+    },
+    { 
+      label: 'Runner', 
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_runner' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_runner' 
+          : 'deko_runner', 
+      pass: 'runner', 
+      role: 'RUNNER', 
+      color: 'indigo' 
+    },
+    { 
+      label: 'Manager', 
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_admin' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_admin' 
+          : 'deko_admin', 
+      pass: 'admin', 
+      role: 'MANAGEMENT', 
+      color: 'blue' 
+    },
+    { 
+      label: 'SysAdmin', 
+      user: tenantId === 'moroseneng' 
+        ? 'moroseneng_admin' 
+        : tenantId === 'ingkung-rahtawu' 
+          ? 'rahtawu_admin' 
+          : 'deko_admin', 
+      pass: 'admin', 
+      role: 'SYSADMIN', 
+      color: 'purple' 
+    }
   ];
 
   const handleFillCredentials = (user: string, pass: string) => {
@@ -73,9 +123,11 @@ export const LoginView: React.FC = () => {
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-cover bg-center transition-all duration-700 select-none"
       style={{
-        backgroundImage: tenantId === 'solaria'
-          ? 'linear-gradient(135deg, rgba(230,57,70,0.85) 0%, rgba(29,53,87,0.9) 100%), url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&q=80")'
-          : 'linear-gradient(135deg, rgba(245,158,11,0.85) 0%, rgba(120,53,15,0.9) 100%), url("https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1600&q=80")'
+        backgroundImage: tenantId === 'moroseneng'
+          ? 'linear-gradient(135deg, rgba(13,148,136,0.85) 0%, rgba(15,23,42,0.9) 100%), url("https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1600&q=80")'
+          : tenantId === 'ingkung-rahtawu'
+            ? 'linear-gradient(135deg, rgba(120,53,15,0.85) 0%, rgba(69,26,3,0.9) 100%), url("https://images.unsplash.com/photo-1544025162-d76694265947?w=1600&q=80")'
+            : 'linear-gradient(135deg, rgba(30,41,59,0.85) 0%, rgba(15,23,42,0.9) 100%), url("https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1600&q=80")'
       }}
     >
       {/* Decorative Blur Orbs */}
@@ -90,9 +142,12 @@ export const LoginView: React.FC = () => {
           <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-brand-primary bg-white shadow-md transition-all duration-500 flex items-center justify-center">
             <img
               src={
-                tenantId === 'solaria'
-                  ? 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=120&h=120&fit=crop&q=80'
-                  : 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=120&h=120&fit=crop&q=80'
+                tenantConfig?.branding.logo_url || 
+                (tenantId === 'moroseneng'
+                  ? 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=120&h=120&fit=crop&q=80'
+                  : tenantId === 'ingkung-rahtawu'
+                    ? 'https://images.unsplash.com/photo-1544025162-d76694265947?w=120&h=120&fit=crop&q=80'
+                    : 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=120&h=120&fit=crop&q=80')
               }
               alt="Logo"
               className="w-full h-full object-cover"
@@ -109,26 +164,39 @@ export const LoginView: React.FC = () => {
         </div>
 
         {/* Tenant Selector Segmented Pill */}
-        <div className="bg-gray-150/80 backdrop-blur rounded-full p-1 border border-gray-200/50 shadow-inner flex">
+        <div className="bg-gray-150/80 backdrop-blur rounded-full p-1 border border-gray-200/50 shadow-inner flex gap-1">
           <button
-            onClick={() => handleTenantChange('solaria')}
-            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-xs transition-all duration-300 cursor-pointer ${
-              tenantId === 'solaria'
+            type="button"
+            onClick={() => handleTenantChange('moroseneng')}
+            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
+              tenantId === 'moroseneng'
                 ? 'bg-brand-primary text-white shadow-md'
                 : 'text-gray-500 hover:text-brand-primary'
             }`}
           >
-            SOLARIA
+            MOROSENENG
           </button>
           <button
-            onClick={() => handleTenantChange('bakmigm')}
-            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-xs transition-all duration-300 cursor-pointer ${
-              tenantId === 'bakmigm'
+            type="button"
+            onClick={() => handleTenantChange('ingkung-rahtawu')}
+            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
+              tenantId === 'ingkung-rahtawu'
                 ? 'bg-brand-primary text-white shadow-md'
                 : 'text-gray-500 hover:text-brand-primary'
             }`}
           >
-            BAKMI GM
+            INGKUNG
+          </button>
+          <button
+            type="button"
+            onClick={() => handleTenantChange('deko-cafe')}
+            className={`flex-1 text-center py-2.5 rounded-full font-extrabold text-[10px] tracking-wider transition-all duration-300 cursor-pointer ${
+              tenantId === 'deko-cafe'
+                ? 'bg-brand-primary text-white shadow-md'
+                : 'text-gray-500 hover:text-brand-primary'
+            }`}
+          >
+            DEKO CAFE
           </button>
         </div>
 

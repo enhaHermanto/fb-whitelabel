@@ -415,16 +415,51 @@ const io = new SocketIOServer(fastify.server, {
   }
 });
 
+// Map of socket.id -> { tenantId, role }
+const activeDevices = new Map<string, { tenantId: string; role: string }>();
+
 io.on('connection', (socket) => {
   console.log(`Socket.IO Client connected: ${socket.id}`);
 
-  // Client joins a tenant-specific room to guarantee data isolation
+  // Register device role and check limits
+  socket.on('device:register', ({ tenantId, role }) => {
+    if (!tenantId || !role) return;
+
+    // Fetch tenant config
+    const config = db.getTenantConfig(tenantId);
+    if (!config) return;
+
+    const isEnterprise = config.subscription_plan === 'ENTERPRISE';
+
+    if (!isEnterprise && (role === 'KASIR' || role === 'KITCHEN')) {
+      // Count existing active connections with the same role for this tenant
+      let activeCount = 0;
+      for (const [id, dev] of activeDevices.entries()) {
+        if (dev.tenantId === tenantId && dev.role === role && id !== socket.id) {
+          activeCount++;
+        }
+      }
+
+      // Check max device limit (1 for Basic/Premium)
+      if (activeCount >= 1) {
+        console.log(`Socket.IO: Device limit exceeded for tenant ${tenantId}, role ${role}. Refusing connection.`);
+        socket.emit('device:limit_exceeded', { role, limit: 1 });
+        return;
+      }
+    }
+
+    // Register active device socket
+    activeDevices.set(socket.id, { tenantId, role });
+    socket.join(`tenant:${tenantId}`);
+    console.log(`Socket ${socket.id} successfully registered for tenant:${tenantId} with role:${role}`);
+  });
+
   socket.on('tenant:join', (tenantId: string) => {
     socket.join(`tenant:${tenantId}`);
-    console.log(`Socket ${socket.id} joined room tenant:${tenantId}`);
   });
 
   socket.on('disconnect', () => {
+    activeDevices.delete(socket.id);
     console.log(`Socket.IO Client disconnected: ${socket.id}`);
   });
 });

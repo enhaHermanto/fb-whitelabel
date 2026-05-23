@@ -3,8 +3,11 @@ import type { MenuItem, Order, OrderItem, OrderStatus, PaymentMethod, PaymentSta
 import { injectTheme } from '@resto-pos/theme-engine';
 import { io, Socket } from 'socket.io-client';
 
+const isHTTPS = window.location.protocol === 'https:';
 const API_HOST = window.location.hostname || 'localhost';
-export const API_URL = `http://${API_HOST}:5000`;
+export const API_URL = isHTTPS 
+  ? `https://${API_HOST}` 
+  : `http://${API_HOST}:5000`;
 
 interface POSState {
   tenantId: string;
@@ -18,6 +21,8 @@ interface POSState {
   isLoading: boolean;
   error: string | null;
   socket: Socket | null;
+  isDeviceLimitExceeded: boolean;
+  blockedRole: string | null;
   
   // Actions
   setTenant: (tenantId: string) => Promise<void>;
@@ -34,13 +39,15 @@ interface POSState {
   updateOrderPayment: (orderId: string, method: PaymentMethod, status: PaymentStatus) => Promise<void>;
   fetchOrders: () => Promise<void>;
   initializeSocket: () => void;
+  registerDeviceSocket: () => void;
+  resetDeviceLimitBlock: () => void;
   addMenuItem: (item: Omit<MenuItem, 'id' | 'available'>) => Promise<void>;
   toggleMenuItem: (id: string) => Promise<void>;
   saveCustomTenantConfig: (config: TenantConfig) => Promise<void>;
 }
 
 export const usePOSStore = create<POSState>((set, get) => ({
-  tenantId: 'solaria',
+  tenantId: 'moroseneng',
   tenantConfig: null,
   menu: [],
   cart: [],
@@ -51,6 +58,8 @@ export const usePOSStore = create<POSState>((set, get) => ({
   isLoading: false,
   error: null,
   socket: null,
+  isDeviceLimitExceeded: false,
+  blockedRole: null,
 
   setTenant: async (tenantId: string) => {
     set({ isLoading: true, error: null, tenantId, cart: [], tableNumber: '', orderNotes: '', deliveryType: 'DINE_IN' });
@@ -270,6 +279,21 @@ export const usePOSStore = create<POSState>((set, get) => ({
     newSocket.on('connect', () => {
       console.log('POSStore: Socket.io connected successfully');
       newSocket.emit('tenant:join', tenantId);
+
+      // Register device role
+      const storedUser = localStorage.getItem('pos_auth_user');
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          console.log(`POSStore: Registering device on connect with role: ${user.role}`);
+          newSocket.emit('device:register', { tenantId, role: user.role });
+        } catch (e) {}
+      }
+    });
+
+    newSocket.on('device:limit_exceeded', ({ role }) => {
+      console.warn(`POSStore: Device limit exceeded for role ${role}`);
+      set({ isDeviceLimitExceeded: true, blockedRole: role });
     });
 
     newSocket.on('order:new', (newOrder: Order) => {
@@ -317,6 +341,23 @@ export const usePOSStore = create<POSState>((set, get) => ({
     });
 
     set({ socket: newSocket });
+  },
+
+  registerDeviceSocket: () => {
+    const { socket, tenantId } = get();
+    if (!socket) return;
+    const storedUser = localStorage.getItem('pos_auth_user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        console.log(`POSStore: Registering device with role: ${user.role}`);
+        socket.emit('device:register', { tenantId, role: user.role });
+      } catch (e) {}
+    }
+  },
+
+  resetDeviceLimitBlock: () => {
+    set({ isDeviceLimitExceeded: false, blockedRole: null });
   },
 
   addMenuItem: async (item: Omit<MenuItem, 'id' | 'available'>) => {

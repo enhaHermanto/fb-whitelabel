@@ -69,9 +69,8 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-primary/20 flex items-center justify-center bg-brand-surface shadow-sm transition-all duration-300">
           <img
             src={
-              tenantId === 'solaria'
-                ? 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&h=100&fit=crop&q=80'
-                : 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100&h=100&fit=crop&q=80'
+              tenantConfig?.branding.logo_url || 
+              'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=100&h=100&fit=crop&q=80'
             }
             alt="Logo"
             className="w-full h-full object-cover"

@@ -14,7 +14,11 @@ export const AdminView: React.FC = () => {
     addMenuItem, toggleMenuItem, saveCustomTenantConfig, isLoading 
   } = usePOSStore();
 
-  const [activeTab, setActiveTab] = useState<'BRANDING' | 'MENU_STOCK' | 'USERS' | 'REPORTS' | 'SHIFT_CLOSE'>('BRANDING');
+  const [activeTab, setActiveTab] = useState<'BRANDING' | 'MENU_STOCK' | 'USERS' | 'REPORTS' | 'SHIFT_CLOSE' | 'LICENSE'>('BRANDING');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [serialInput, setSerialInput] = useState('');
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const [activationSuccess, setActivationSuccess] = useState<string | null>(null);
 
   // --- USER MANAGEMENT STATE ---
   const [usersList, setUsersList] = useState<any[]>([]);
@@ -65,8 +69,14 @@ export const AdminView: React.FC = () => {
       setWifiPassword(tenantConfig.receipt.wifi_password || '');
       setReceiptHeader(tenantConfig.receipt.header || '');
       setReceiptFooter(tenantConfig.receipt.footer || '');
+
+      // Auto-fallback if active tab is premium and tenant is basic
+      const premiumTabs = ['BRANDING', 'USERS', 'REPORTS'];
+      if (tenantConfig.subscription_plan === 'BASIC' && premiumTabs.includes(activeTab)) {
+        setActiveTab('MENU_STOCK');
+      }
     }
-  }, [tenantConfig, tenantId]);
+  }, [tenantConfig, tenantId, activeTab]);
 
   // Fetch reports on switch
   const fetchReports = async () => {
@@ -304,6 +314,48 @@ export const AdminView: React.FC = () => {
     setShowShiftCloseReceipt(true);
   };
 
+  const handleTabClick = (tabId: string, isPremium: boolean) => {
+    if (isPremium && tenantConfig?.subscription_plan === 'BASIC') {
+      setShowUpgradeModal(true);
+      return;
+    }
+    setActiveTab(tabId as any);
+  };
+
+  const handleActivateLicense = async () => {
+    if (!tenantConfig) return;
+    if (!serialInput.trim()) {
+      setActivationError('Mohon masukkan Serial Number yang valid!');
+      return;
+    }
+
+    setActivationError(null);
+    setActivationSuccess(null);
+
+    // Validation for demo purposes
+    if (tenantId === 'moroseneng' && !serialInput.startsWith('MORO-')) {
+      setActivationError('Serial Number tidak valid untuk outlet ini! Gunakan kode "MORO-62821-ACTIVE" untuk aktivasi demo.');
+      return;
+    }
+
+    const updatedConfig: TenantConfig = {
+      ...tenantConfig,
+      license: {
+        serial_number: serialInput,
+        license_status: 'ACTIVE',
+        activated_at: new Date().toISOString()
+      }
+    };
+
+    try {
+      await saveCustomTenantConfig(updatedConfig);
+      setActivationSuccess('Lisensi Beli Putus Berhasil Diverifikasi & Aktif Permanen!');
+      setSerialInput('');
+    } catch (err) {
+      setActivationError('Gagal melakukan aktivasi lisensi.');
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6 p-2 h-full overflow-y-auto">
       {/* Visual Welcome Banner */}
@@ -324,20 +376,23 @@ export const AdminView: React.FC = () => {
       </div>
 
       {/* Brand Switcher Pills */}
-      <div className="flex gap-3 bg-white p-2.5 rounded-brand border border-gray-200 shadow-sm items-center">
-        <span className="text-xs font-bold text-gray-500 uppercase px-2">Tenant Aktif:</span>
-        <div className="flex gap-2">
+      <div className="flex gap-3 bg-white p-2.5 rounded-brand border border-gray-200 shadow-sm items-center flex-wrap">
+        <span className="text-[10px] font-black text-slate-400 uppercase px-2 tracking-widest">Demo Sandbox:</span>
+        <div className="flex gap-2 flex-wrap">
           {[
-            { id: 'solaria', label: 'Solaria' },
-            { id: 'bakmigm', label: 'Bakmi GM' }
+            { id: 'moroseneng', label: 'Moroseneng 🟢 Basic', plan: 'BASIC' },
+            { id: 'ingkung-rahtawu', label: 'Ingkung Rahtawu 🔵 Premium', plan: 'PREMIUM' },
+            { id: 'deko-cafe', label: 'Deko Cafe 🔵 Premium', plan: 'PREMIUM' },
+            { id: 'solaria', label: 'Solaria 🔵 Premium', plan: 'PREMIUM' },
+            { id: 'bakmigm', label: 'Bakmi GM 🟣 Enterprise', plan: 'ENTERPRISE' }
           ].map(tenant => (
             <button
               key={tenant.id}
               onClick={() => handleSwitchTenant(tenant.id)}
-              className={`text-xs font-extrabold px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer ${
+              className={`text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full border transition-all duration-200 cursor-pointer ${
                 tenantId === tenant.id
                   ? 'bg-brand-primary text-white shadow border-brand-primary'
-                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-350 hover:bg-slate-100'
               }`}
             >
               {tenant.label}
@@ -348,27 +403,36 @@ export const AdminView: React.FC = () => {
       </div>
 
       {/* PREMIUM TABS CONTROLLER */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 bg-gray-100 p-1.5 rounded-brand border border-gray-200">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-2 bg-gray-100 p-1.5 rounded-brand border border-gray-200">
         {[
-          { id: 'BRANDING', label: 'Kustomisasi Brand', icon: Palette },
-          { id: 'MENU_STOCK', label: 'Manajemen Menu', icon: Sparkles },
-          { id: 'USERS', label: 'Manajemen User', icon: Users },
-          { id: 'REPORTS', label: 'Laporan Omzet', icon: BarChart3 },
-          { id: 'SHIFT_CLOSE', label: 'Tutup Shift', icon: Lock }
+          { id: 'BRANDING', label: 'Kustomisasi Brand', icon: Palette, premium: true },
+          { id: 'MENU_STOCK', label: 'Manajemen Menu', icon: Sparkles, premium: false },
+          { id: 'USERS', label: 'Manajemen User', icon: Users, premium: true },
+          { id: 'REPORTS', label: 'Laporan Omzet', icon: BarChart3, premium: true },
+          { id: 'SHIFT_CLOSE', label: 'Tutup Shift', icon: Lock, premium: false },
+          { id: 'LICENSE', label: 'Lisensi & Paket', icon: Shield, premium: false }
         ].map(tab => {
           const Icon = tab.icon;
+          const isBasic = tenantConfig?.subscription_plan === 'BASIC';
+          const isLocked = tab.premium && isBasic;
+          
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3.5 px-2 rounded-brand font-bold text-[10px] sm:text-xs transition-all duration-200 cursor-pointer ${
-                activeTab === tab.id
+              onClick={() => handleTabClick(tab.id, tab.premium)}
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-3.5 px-2 rounded-brand font-bold text-[10px] sm:text-xs transition-all duration-200 cursor-pointer relative ${
+                activeTab === tab.id && !isLocked
                   ? 'bg-white text-brand-primary shadow border border-gray-200'
                   : 'text-gray-500 hover:text-gray-800'
-              }`}
+              } ${isLocked ? 'opacity-70 bg-gray-100 hover:bg-gray-150 border-dashed border border-gray-300' : ''}`}
             >
-              <Icon className="w-4 h-4" />
-              {tab.label}
+              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{tab.label}</span>
+              {isLocked && (
+                <span className="absolute -top-1 -right-1 text-[10px] bg-amber-500/10 text-amber-600 font-extrabold px-1 rounded flex items-center justify-center">
+                  🔒
+                </span>
+              )}
             </button>
           );
         })}
@@ -1262,7 +1326,243 @@ export const AdminView: React.FC = () => {
           </div>
         )}
 
+        {/* =========================================== */}
+        {/* TAB 6: LISENSI & PAKET BERLANGGANAN        */}
+        {/* =========================================== */}
+        {activeTab === 'LICENSE' && tenantConfig && (
+          <div className="space-y-6">
+            <div className="border-b border-gray-100 pb-3 flex justify-between items-center">
+              <div>
+                <h3 className="font-extrabold text-gray-800 text-sm uppercase tracking-wide">
+                  Lisensi &amp; Paket Berlangganan POS
+                </h3>
+                <p className="text-[10px] text-gray-400 mt-0.5">Kelola tipe plan dan aktivasi beli putus menggunakan Serial Number</p>
+              </div>
+              <Shield className="w-5 h-5 text-brand-primary" />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* CURRENT STATUS */}
+              <div className="bg-slate-50 border border-slate-200 rounded-brand p-5 space-y-4">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-2">Status Lisensi Aktif</h4>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-semibold">Tipe Paket Berlangganan:</span>
+                    <span className={`font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full ${
+                      tenantConfig.subscription_plan === 'BASIC'
+                        ? 'bg-amber-100 text-amber-700 font-black border border-amber-200'
+                        : tenantConfig.subscription_plan === 'PREMIUM'
+                          ? 'bg-blue-100 text-blue-700 font-black border border-blue-200'
+                          : 'bg-purple-100 text-purple-700 font-black border border-purple-200'
+                    }`}>
+                      {tenantConfig.subscription_plan} PLAN
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-500 font-semibold">Status Lisensi Beli Putus:</span>
+                    <span className={`font-black uppercase tracking-widest text-[9px] px-3 py-1 rounded-full ${
+                      tenantConfig.license?.license_status === 'ACTIVE'
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : 'bg-red-100 text-red-700 animate-pulse border border-red-200'
+                    }`}>
+                      {tenantConfig.license?.license_status || 'UNLICENSED'}
+                    </span>
+                  </div>
+
+                  {tenantConfig.license?.serial_number && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500 font-semibold">Serial Number:</span>
+                      <span className="font-mono font-bold text-slate-800 bg-white border border-slate-200 px-2 py-0.5 rounded text-[10px]">
+                        {tenantConfig.license.serial_number}
+                      </span>
+                    </div>
+                  )}
+
+                  {tenantConfig.license?.activated_at && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500 font-semibold">Tanggal Aktivasi:</span>
+                      <span className="font-semibold text-slate-700">
+                        {new Date(tenantConfig.license.activated_at).toLocaleDateString('id-ID', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pricing / Plan details */}
+                <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-2 mt-4 shadow-sm">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">DETAIL KAPASITAS PERANGKAT LISENSI</span>
+                  <div className="text-xs space-y-1.5 text-slate-600 font-semibold">
+                    <p className="flex justify-between">
+                      <span>🖥️ Tablet Kasir aktif:</span>
+                      <span className="text-slate-800 font-extrabold">{tenantConfig.subscription_plan === 'ENTERPRISE' ? 'Tanpa Batas' : 'Maks. 1 Perangkat'}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>🍳 Layar Monitor Dapur:</span>
+                      <span className="text-slate-800 font-extrabold">{tenantConfig.subscription_plan === 'ENTERPRISE' ? 'Tanpa Batas' : 'Maks. 1 Perangkat'}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>🏃 Pelayan / Runner:</span>
+                      <span className="text-green-600 font-extrabold">Tanpa Batas (Bebas)</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* SERIAL ACTIVATION CARD */}
+              <div className="bg-slate-50 border border-slate-200 rounded-brand p-5 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-2">Aktivasi Serial Number Beli Putus</h4>
+                  <p className="text-[11px] text-slate-500 leading-normal">
+                    Masukkan Serial Number sekali aktivasi yang Anda beli untuk memverifikasi lisensi restoran offline-first Anda secara permanen.
+                  </p>
+                  
+                  {activationError && (
+                    <div className="bg-red-50 border border-red-200 text-red-800 text-[11px] rounded p-3 font-semibold">
+                      ❌ {activationError}
+                    </div>
+                  )}
+
+                  {activationSuccess && (
+                    <div className="bg-green-50 border border-green-200 text-green-800 text-[11px] rounded p-3 font-semibold">
+                      🎉 {activationSuccess}
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase">Serial Number Key</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. MORO-62821-ACTIVE"
+                      value={serialInput}
+                      onChange={(e) => setSerialInput(e.target.value.toUpperCase().trim())}
+                      className="w-full text-xs font-mono font-bold tracking-widest bg-white border border-slate-200 rounded px-2.5 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-slate-200">
+                  <button
+                    onClick={handleActivateLicense}
+                    className="w-full bg-brand-primary hover:bg-brand-primary-hover text-white font-bold text-xs py-3 rounded shadow transition-all duration-200 cursor-pointer"
+                  >
+                    Verifikasi &amp; Aktifkan Lisensi
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
+
+      {/* PREMIUM UPGRADE PITCH MODAL */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl relative overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
+            {/* Top color accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-teal-500 via-blue-500 to-purple-600"></div>
+
+            <button
+              onClick={() => setShowUpgradeModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-extrabold text-sm p-1.5 rounded-full hover:bg-slate-100 transition-all duration-200 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="text-center space-y-2 mb-6">
+              <h3 className="text-xl font-extrabold text-slate-800 tracking-tight flex items-center justify-center gap-1.5">
+                💼 Tingkatkan Paket POS Restoran Anda
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Fitur ini dikunci pada paket Basic. Silakan pilih paket terbaik sesuai kebutuhan skala operasional outlet Anda.
+              </p>
+            </div>
+
+            {/* Comparison Table */}
+            <div className="overflow-x-auto border border-slate-200 rounded-xl my-6">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+                    <th className="p-3">Fitur</th>
+                    <th className="p-3 text-center text-amber-600 font-extrabold">🟢 BASIC</th>
+                    <th className="p-3 text-center text-blue-600 font-extrabold">🔵 PREMIUM</th>
+                    <th className="p-3 text-center text-purple-600 font-black">🟣 ENTERPRISE</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                  <tr>
+                    <td className="p-3">Harga Per Bulan</td>
+                    <td className="p-3 text-center font-bold text-amber-600">Rp 125.000</td>
+                    <td className="p-3 text-center font-bold text-blue-600">Rp 200.000</td>
+                    <td className="p-3 text-center font-bold text-purple-600 font-black">KONTAK WA</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Batas Device Kasir &amp; Dapur</td>
+                    <td className="p-3 text-center text-amber-600 text-[10px]">Maks. 1 Perangkat</td>
+                    <td className="p-3 text-center text-blue-600 text-[10px]">Maks. 1 Perangkat</td>
+                    <td className="p-3 text-center text-green-600 text-[10px] font-extrabold">TANPA BATAS ✅</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Aplikasi Pelayan / Waiter (Runner)</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Pembayaran QRIS Dinamis Otomatis</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Kustomisasi Visual Brand (Logo &amp; Warna)</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Laporan Omzet Lengkap &amp; PPN</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Tersedia ✅</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3">Teknikal Support &amp; Fitur Bebas Kustom</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-red-500 font-extrabold">❌ Gembok</td>
+                    <td className="p-3 text-center text-green-600 font-extrabold">Support 3 Bln ✅</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <a
+                href="https://wa.me/6282130338787?text=Halo%20Mas,%20saya%20tertarik%20dengan%20salah%20satu%20paket%20POS%20Restoran%20Anda.%20Bisa%20diskusi%20lebih%20lanjut?"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 text-center bg-brand-primary hover:bg-brand-primary-hover text-white font-extrabold text-xs py-3.5 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                💬 Hubungi Pemasaran via WhatsApp
+              </a>
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="sm:w-32 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold text-xs py-3.5 rounded-xl transition-all duration-200 cursor-pointer"
+              >
+                Kembali
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

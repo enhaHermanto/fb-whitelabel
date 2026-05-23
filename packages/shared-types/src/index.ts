@@ -32,6 +32,14 @@ export interface FeatureFlags {
   order_priority: boolean;
 }
 
+export type SubscriptionPlan = 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
+
+export interface LicenseConfig {
+  serial_number?: string;
+  license_status: 'UNLICENSED' | 'ACTIVE' | 'EXPIRED';
+  activated_at?: string;
+}
+
 export interface ReceiptConfig {
   header: string;
   footer: string;
@@ -43,9 +51,11 @@ export interface ReceiptConfig {
 
 export interface TenantConfig {
   tenant_id: string;
+  subscription_plan: SubscriptionPlan;
   branding: BrandingConfig;
   feature_flags: FeatureFlags;
   receipt: ReceiptConfig;
+  license?: LicenseConfig;
 }
 
 export interface MenuItem {

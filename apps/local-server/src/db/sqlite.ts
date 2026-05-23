@@ -38,9 +38,11 @@ export class SQLiteDB {
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS tenant_configs (
         tenant_id TEXT PRIMARY KEY,
+        subscription_plan TEXT NOT NULL DEFAULT 'BASIC',
         branding TEXT NOT NULL,
         feature_flags TEXT NOT NULL,
-        receipt TEXT NOT NULL
+        receipt TEXT NOT NULL,
+        license TEXT
       )
     `);
 
@@ -111,6 +113,16 @@ export class SQLiteDB {
 
     // Schema Migrations (Kondisional)
     try {
+      this.db.exec(`ALTER TABLE tenant_configs ADD COLUMN subscription_plan TEXT NOT NULL DEFAULT 'BASIC'`);
+      console.log('SQLiteDB: Migrated tenant_configs table - added subscription_plan column.');
+    } catch (e) {}
+
+    try {
+      this.db.exec(`ALTER TABLE tenant_configs ADD COLUMN license TEXT`);
+      console.log('SQLiteDB: Migrated tenant_configs table - added license column.');
+    } catch (e) {}
+
+    try {
       this.db.exec(`ALTER TABLE orders ADD COLUMN notes TEXT`);
       console.log('SQLiteDB: Migrated orders table - added notes column.');
     } catch (e) {
@@ -139,6 +151,7 @@ export class SQLiteDB {
     // Seed Tenants
     const solariaConfig: TenantConfig = {
       tenant_id: 'solaria',
+      subscription_plan: 'PREMIUM',
       branding: {
         brand_name: 'Solaria',
         logo_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100&h=100&fit=crop&q=80',
@@ -169,11 +182,17 @@ export class SQLiteDB {
         paper_size: '80mm',
         wifi_ssid: 'Solaria_Gratis_5G',
         wifi_password: 'nasispesialsolaria'
+      },
+      license: {
+        serial_number: 'SOL-62821-ACTIVE',
+        license_status: 'ACTIVE',
+        activated_at: new Date().toISOString()
       }
     };
 
     const bakmigmConfig: TenantConfig = {
       tenant_id: 'bakmigm',
+      subscription_plan: 'ENTERPRISE',
       branding: {
         brand_name: 'Bakmi GM',
         logo_url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100&h=100&fit=crop&q=80',
@@ -204,27 +223,184 @@ export class SQLiteDB {
         paper_size: '80mm',
         wifi_ssid: 'Bakmi_GM_Premium',
         wifi_password: 'pangsitgorenglezat'
+      },
+      license: {
+        serial_number: 'GM-9988-ENTERPRISE',
+        license_status: 'ACTIVE',
+        activated_at: new Date().toISOString()
+      }
+    };
+
+    const morosenengConfig: TenantConfig = {
+      tenant_id: 'moroseneng',
+      subscription_plan: 'BASIC',
+      branding: {
+        brand_name: 'Warung Moroseneng',
+        logo_url: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=100&h=100&fit=crop&q=80',
+        theme: {
+          primary_color: '#0D9488', // Teal branding
+          secondary_color: '#F0FDFA',
+          background_color: '#FFFFFF',
+          surface_color: '#F8FAFC',
+          text_primary: '#0F172A',
+          text_secondary: '#475569',
+          accent_color: '#14B8A6',
+          error_color: '#EF4444',
+          success_color: '#10B981',
+          font_family: 'Outfit, sans-serif',
+          border_radius: '10px'
+        }
+      },
+      feature_flags: {
+        qris_payment: false,
+        runner_app: false,
+        customer_display: false,
+        order_priority: false
+      },
+      receipt: {
+        header: 'TERIMA KASIH TELAH MAMPIR DI WARUNG MOROSENENG',
+        footer: 'Sedia Aneka Penyetan & Masakan Khas Jawa Timur',
+        show_logo: true,
+        paper_size: '58mm',
+        wifi_ssid: '',
+        wifi_password: ''
+      },
+      license: {
+        license_status: 'UNLICENSED'
+      }
+    };
+
+    const ingkungrahtawuConfig: TenantConfig = {
+      tenant_id: 'ingkung-rahtawu',
+      subscription_plan: 'PREMIUM',
+      branding: {
+        brand_name: 'Ingkung Rahtawu',
+        logo_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=100&h=100&fit=crop&q=80',
+        theme: {
+          primary_color: '#78350F', // Javanese Classic Warm Brown
+          secondary_color: '#FEF3C7',
+          background_color: '#FFFFFF',
+          surface_color: '#FFFDF5',
+          text_primary: '#451A03',
+          text_secondary: '#78350F',
+          accent_color: '#D97706',
+          error_color: '#EF4444',
+          success_color: '#10B981',
+          font_family: 'Plus Jakarta Sans, sans-serif',
+          border_radius: '12px'
+        }
+      },
+      feature_flags: {
+        qris_payment: true,
+        runner_app: true,
+        customer_display: false,
+        order_priority: true
+      },
+      receipt: {
+        header: 'SUGENG RAWUH INGKUNG RAHTAWU - KUDUS',
+        footer: 'Matur Nuwun Sanget, Sugeng Kondur',
+        show_logo: true,
+        paper_size: '80mm',
+        wifi_ssid: 'Ingkung_Rahtawu_VIP',
+        wifi_password: 'ingkungmaknyus'
+      },
+      license: {
+        serial_number: 'RAHTAWU-62821-ACTIVE',
+        license_status: 'ACTIVE',
+        activated_at: new Date().toISOString()
+      }
+    };
+
+    const dekocafeConfig: TenantConfig = {
+      tenant_id: 'deko-cafe',
+      subscription_plan: 'PREMIUM',
+      branding: {
+        brand_name: 'Deko Cafe',
+        logo_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=100&h=100&fit=crop&q=80',
+        theme: {
+          primary_color: '#1E293B', // Sleek Modern Slate Charcoal
+          secondary_color: '#F1F5F9',
+          background_color: '#FFFFFF',
+          surface_color: '#F8FAFC',
+          text_primary: '#0F172A',
+          text_secondary: '#475569',
+          accent_color: '#D97706', // Warm Amber Cafe Accents
+          error_color: '#EF4444',
+          success_color: '#10B981',
+          font_family: 'Outfit, sans-serif',
+          border_radius: '16px'
+        }
+      },
+      feature_flags: {
+        qris_payment: true,
+        runner_app: true,
+        customer_display: true,
+        order_priority: false
+      },
+      receipt: {
+        header: 'DEKO CAFE & ROASTERY',
+        footer: 'Follow Us: @deko.cafe | Thank you!',
+        show_logo: true,
+        paper_size: '80mm',
+        wifi_ssid: 'Deko_Cafe_HighSpeed',
+        wifi_password: 'ngopidekocafe'
+      },
+      license: {
+        serial_number: 'DEKO-62821-ACTIVE',
+        license_status: 'ACTIVE',
+        activated_at: new Date().toISOString()
       }
     };
 
     // Save Tenants only if they do not already exist, to preserve user-customized visual branding across restarts
     const insertTenant = this.db.prepare(`
-      INSERT OR IGNORE INTO tenant_configs (tenant_id, branding, feature_flags, receipt)
-      VALUES (?, ?, ?, ?)
+      INSERT OR IGNORE INTO tenant_configs (tenant_id, subscription_plan, branding, feature_flags, receipt, license)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
 
     insertTenant.run(
       'solaria',
+      solariaConfig.subscription_plan,
       JSON.stringify(solariaConfig.branding),
       JSON.stringify(solariaConfig.feature_flags),
-      JSON.stringify(solariaConfig.receipt)
+      JSON.stringify(solariaConfig.receipt),
+      JSON.stringify(solariaConfig.license)
     );
 
     insertTenant.run(
       'bakmigm',
+      bakmigmConfig.subscription_plan,
       JSON.stringify(bakmigmConfig.branding),
       JSON.stringify(bakmigmConfig.feature_flags),
-      JSON.stringify(bakmigmConfig.receipt)
+      JSON.stringify(bakmigmConfig.receipt),
+      JSON.stringify(bakmigmConfig.license)
+    );
+
+    insertTenant.run(
+      'moroseneng',
+      morosenengConfig.subscription_plan,
+      JSON.stringify(morosenengConfig.branding),
+      JSON.stringify(morosenengConfig.feature_flags),
+      JSON.stringify(morosenengConfig.receipt),
+      JSON.stringify(morosenengConfig.license)
+    );
+
+    insertTenant.run(
+      'ingkung-rahtawu',
+      ingkungrahtawuConfig.subscription_plan,
+      JSON.stringify(ingkungrahtawuConfig.branding),
+      JSON.stringify(ingkungrahtawuConfig.feature_flags),
+      JSON.stringify(ingkungrahtawuConfig.receipt),
+      JSON.stringify(ingkungrahtawuConfig.license)
+    );
+
+    insertTenant.run(
+      'deko-cafe',
+      dekocafeConfig.subscription_plan,
+      JSON.stringify(dekocafeConfig.branding),
+      JSON.stringify(dekocafeConfig.feature_flags),
+      JSON.stringify(dekocafeConfig.receipt),
+      JSON.stringify(dekocafeConfig.license)
     );
 
     // Seed Menu Items
@@ -232,7 +408,7 @@ export class SQLiteDB {
       // Solaria Menu
       { id: 'sol-01', code: 'A01', name: 'Nasi Goreng Spesial', price: 35000, category: 'FOOD', description: 'Nasi goreng lezat khas Solaria dengan bakso ikan, ayam, telur mata sapi, dan kerupuk.', image_url: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&auto=format&fit=crop&q=60', available: true },
       { id: 'sol-02', code: 'A02', name: 'Kwetiau Siram Ayam', price: 38000, category: 'FOOD', description: 'Kwetiau basah disiram kuah kental gurih lengkap dengan potongan ayam, sayuran segar, dan telur.', image_url: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=60', available: true },
-      { id: 'sol-03', code: 'A03', name: 'Chicken Cordon Bleu', price: 45000, category: 'FOOD', description: 'Dada ayam gulung isi keju mozarella dan smoked beef goreng tepung roti gurih.', image_url: 'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'sol-03', code: 'A03', name: 'Chicken Cordon Bleu', price: 45000, category: 'FOOD', description: 'Dada ayam gulung isi keju mozarella and smoked beef goreng tepung roti gurih.', image_url: 'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=400&auto=format&fit=crop&q=60', available: true },
       { id: 'sol-04', code: 'D01', name: 'Es Teh Manis', price: 12000, category: 'BEVERAGE', description: 'Es teh manis segar pelepas dahaga.', image_url: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=400&auto=format&fit=crop&q=60', available: true },
       { id: 'sol-05', code: 'D02', name: 'Jus Alpukat', price: 22000, category: 'BEVERAGE', description: 'Jus buah alpukat segar kental dengan saus cokelat manis.', image_url: 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=400&auto=format&fit=crop&q=60', available: true },
       { id: 'sol-06', code: 'S01', name: 'Kentang Goreng', price: 18000, category: 'SNACK', description: 'Kentang goreng renyah bumbu garam gurih.', image_url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&auto=format&fit=crop&q=60', available: true },
@@ -242,7 +418,23 @@ export class SQLiteDB {
       { id: 'gm-02', code: 'B02', name: 'Bakmi Ayam Saus Thai', price: 36000, category: 'FOOD', description: 'Bakmi GM dengan topping ayam goreng renyah disiram saus khas Thailand asam pedas.', image_url: 'https://images.unsplash.com/photo-1552611052-33e04de081de?w=400&auto=format&fit=crop&q=60', available: true },
       { id: 'gm-03', code: 'B03', name: 'Pangsit Goreng (5 pcs)', price: 21000, category: 'SNACK', description: 'Pangsit goreng legendaris Bakmi GM yang renyah dengan saus merah manis khas.', image_url: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=400&auto=format&fit=crop&q=60', available: true },
       { id: 'gm-04', code: 'GD01', name: 'Es Teh Manis GM', price: 10000, category: 'BEVERAGE', description: 'Es teh manis segar aroma melati khas GM.', image_url: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&auto=format&fit=crop&q=60', available: true },
-      { id: 'gm-05', code: 'GD02', name: 'Es Green Tea Lychee', price: 18000, category: 'BEVERAGE', description: 'Es teh hijau dingin rasa buah leci menyegarkan.', image_url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&auto=format&fit=crop&q=60', available: true }
+      { id: 'gm-05', code: 'GD02', name: 'Es Green Tea Lychee', price: 18000, category: 'BEVERAGE', description: 'Es teh hijau dingin rasa buah leci menyegarkan.', image_url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&auto=format&fit=crop&q=60', available: true },
+
+      // Moroseneng Menu
+      { id: 'mor-01', code: 'A01', name: 'Nasi Ayam Penyet', price: 22000, category: 'FOOD', description: 'Nasi hangat dengan ayam goreng renyah dipadukan sambal ulek korek pedas mantap dan lalapan segar.', image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'mor-02', code: 'A02', name: 'Bakso Urat Wonogiri', price: 18000, category: 'FOOD', description: 'Bakso sapi urat khas Wonogiri dengan kuah kaldu sapi bening gurih nan lezat.', image_url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'mor-03', code: 'D01', name: 'Es Jeruk Peras', price: 8000, category: 'BEVERAGE', description: 'Es jeruk peras asli segar kaya vitamin C.', image_url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'mor-04', code: 'D02', name: 'Es Teh Manis', price: 5000, category: 'BEVERAGE', description: 'Es teh manis segar pelepas dahaga.', image_url: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?w=400&auto=format&fit=crop&q=60', available: true },
+
+      // Ingkung Rahtawu Menu
+      { id: 'rah-01', code: 'A01', name: 'Ingkung Ayam Kampung Utuh', price: 120000, category: 'FOOD', description: 'Satu ekor ayam kampung utuh dimasak dengan santan kental bumbu rempah tradisional Jawa yang meresap dan gurih manis pedas.', image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'rah-02', code: 'A02', name: 'Nasi Ingkung Ayam Potong', price: 35000, category: 'FOOD', description: 'Nasi hangat disajikan dengan porsi potongan ayam ingkung empuk bumbu areh santan gurih, sambal bajak khas Kudus, dan lalapan.', image_url: 'https://images.unsplash.com/photo-1598515214211-89d3e73ae83b?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'rah-03', code: 'D01', name: 'Wedang Uwuh Wangi', price: 12000, category: 'BEVERAGE', description: 'Wedang uwuh rempah tradisional hangat dengan secang, jahe, kayu manis, dan cengkeh harum.', image_url: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=400&auto=format&fit=crop&q=60', available: true },
+
+      // Deko Cafe Menu
+      { id: 'dec-01', code: 'C01', name: 'Specialty Cafe Latte', price: 28000, category: 'BEVERAGE', description: 'Double espresso blend dengan susu lembut premium, foam tebal, dan seni latte art yang menawan.', image_url: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'dec-02', code: 'C02', name: 'Ice Caramel Macchiato', price: 32000, category: 'BEVERAGE', description: 'Paduan dingin espresso kental, fresh milk, vanilla syrup, dan siraman saus karamel lezat di atasnya.', image_url: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400&auto=format&fit=crop&q=60', available: true },
+      { id: 'dec-03', code: 'S01', name: 'Premium Butter Croissant', price: 20000, category: 'SNACK', description: 'Croissant butter Prancis klasik yang renyah di luar, berongga lembut, harum mentega gurih.', image_url: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&auto=format&fit=crop&q=60', available: true }
     ];
 
     const insertMenu = this.db.prepare(`
@@ -251,7 +443,15 @@ export class SQLiteDB {
     `);
 
     for (const item of menuItems) {
-      const tenantId = item.id.startsWith('sol') ? 'solaria' : 'bakmigm';
+      const tenantId = item.id.startsWith('sol') 
+        ? 'solaria' 
+        : (item.id.startsWith('gm') 
+          ? 'bakmigm' 
+          : (item.id.startsWith('mor') 
+            ? 'moroseneng' 
+            : (item.id.startsWith('rah') 
+              ? 'ingkung-rahtawu' 
+              : 'deko-cafe')));
       insertMenu.run(
         item.id,
         tenantId,
@@ -265,7 +465,7 @@ export class SQLiteDB {
       );
     }
 
-    // Seed Users (10 users total)
+    // Seed Users
     const defaultUsers = [
       // Solaria Users
       { id: 'u-sol-admin', tenant_id: 'solaria', username: 'solaria_admin', name: 'Solaria Admin', role: 'SYSADMIN', password: 'admin' },
@@ -279,7 +479,25 @@ export class SQLiteDB {
       { id: 'u-gm-cashier', tenant_id: 'bakmigm', username: 'gm_cashier', name: 'Eka Rahayu', role: 'KASIR', password: 'cashier' },
       { id: 'u-gm-kitchen', tenant_id: 'bakmigm', username: 'gm_kitchen', name: 'Fajar Chef', role: 'KITCHEN', password: 'kitchen' },
       { id: 'u-gm-runner', tenant_id: 'bakmigm', username: 'gm_runner', name: 'Gita Runner', role: 'RUNNER', password: 'runner' },
-      { id: 'u-gm-manager', tenant_id: 'bakmigm', username: 'gm_manager', name: 'Hadi Manager', role: 'MANAGEMENT', password: 'manager' }
+      { id: 'u-gm-manager', tenant_id: 'bakmigm', username: 'gm_manager', name: 'Hadi Manager', role: 'MANAGEMENT', password: 'manager' },
+
+      // Moroseneng Users
+      { id: 'u-mor-admin', tenant_id: 'moroseneng', username: 'moroseneng_admin', name: 'Moroseneng Admin', role: 'SYSADMIN', password: 'admin' },
+      { id: 'u-mor-cashier', tenant_id: 'moroseneng', username: 'moroseneng_cashier', name: 'Sri Wahyuni', role: 'KASIR', password: 'cashier' },
+      { id: 'u-mor-kitchen', tenant_id: 'moroseneng', username: 'moroseneng_kitchen', name: 'Pak Slamet', role: 'KITCHEN', password: 'kitchen' },
+      { id: 'u-mor-runner', tenant_id: 'moroseneng', username: 'moroseneng_runner', name: 'Tono Runner', role: 'RUNNER', password: 'runner' },
+
+      // Ingkung Rahtawu Users
+      { id: 'u-rah-admin', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_admin', name: 'Rahtawu Admin', role: 'SYSADMIN', password: 'admin' },
+      { id: 'u-rah-cashier', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_cashier', name: 'Wahyu Cashier', role: 'KASIR', password: 'cashier' },
+      { id: 'u-rah-kitchen', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_kitchen', name: 'Siti Chef', role: 'KITCHEN', password: 'kitchen' },
+      { id: 'u-rah-runner', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_runner', name: 'Lilik Runner', role: 'RUNNER', password: 'runner' },
+
+      // Deko Cafe Users
+      { id: 'u-dec-admin', tenant_id: 'deko-cafe', username: 'deko_admin', name: 'Deko Admin', role: 'SYSADMIN', password: 'admin' },
+      { id: 'u-dec-cashier', tenant_id: 'deko-cafe', username: 'deko_cashier', name: 'Putri Cashier', role: 'KASIR', password: 'cashier' },
+      { id: 'u-dec-kitchen', tenant_id: 'deko-cafe', username: 'deko_kitchen', name: 'Rian Barista', role: 'KITCHEN', password: 'kitchen' },
+      { id: 'u-dec-runner', tenant_id: 'deko-cafe', username: 'deko_runner', name: 'Bimo Runner', role: 'RUNNER', password: 'runner' }
     ];
 
     const insertUser = this.db.prepare(`
@@ -311,9 +529,11 @@ export class SQLiteDB {
     const row = result[0];
     return {
       tenant_id: row.tenant_id,
+      subscription_plan: (row.subscription_plan as any) || 'BASIC',
       branding: JSON.parse(row.branding),
       feature_flags: JSON.parse(row.feature_flags),
-      receipt: JSON.parse(row.receipt)
+      receipt: JSON.parse(row.receipt),
+      license: row.license ? JSON.parse(row.license) : { license_status: 'UNLICENSED' }
     };
   }
 
@@ -514,14 +734,16 @@ export class SQLiteDB {
 
   public saveCustomTenantConfig(config: TenantConfig): void {
     const insert = this.db.prepare(`
-      INSERT OR REPLACE INTO tenant_configs (tenant_id, branding, feature_flags, receipt)
-      VALUES (?, ?, ?, ?)
+      INSERT OR REPLACE INTO tenant_configs (tenant_id, subscription_plan, branding, feature_flags, receipt, license)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
     insert.run(
       config.tenant_id,
+      config.subscription_plan || 'BASIC',
       JSON.stringify(config.branding),
       JSON.stringify(config.feature_flags),
-      JSON.stringify(config.receipt)
+      JSON.stringify(config.receipt),
+      config.license ? JSON.stringify(config.license) : null
     );
   }
 

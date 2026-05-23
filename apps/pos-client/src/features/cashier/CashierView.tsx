@@ -72,6 +72,11 @@ export const CashierView: React.FC = () => {
     }
   };
 
+  const handleQrisGatedClick = () => {
+    alert("🔒 Fitur QRIS Dinamis Otomatis hanya tersedia di Paket PREMIUM dan ENTERPRISE! Silakan hubungi kami di WhatsApp (0821-3033-8787) untuk mengaktifkan paket Premium.");
+    window.open("https://wa.me/6282130338787?text=Halo%20Mas,%20saya%20tertarik%20dengan%20Plan%20Premium%20karena%20ingin%20mengaktifkan%20fitur%20QRIS%20pada%20aplikasi%20POS%20saya", "_blank");
+  };
+
   const handleConfirmQRISPayment = async () => {
     if (!qrisOrder) return;
     setQrCodeStatus('SUCCESS');
@@ -443,13 +448,24 @@ export const CashierView: React.FC = () => {
             Bayar Tunai
           </button>
           
-          {tenantConfig?.feature_flags.qris_payment && (
+          {(tenantConfig?.subscription_plan === 'BASIC' || tenantConfig?.feature_flags.qris_payment) && (
             <button
-              onClick={handleCheckoutQRIS}
-              disabled={isLoading || cart.length === 0}
-              className="bg-brand-primary hover:bg-brand-primary-hover text-white font-bold text-xs py-3 rounded-brand shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              onClick={tenantConfig?.subscription_plan === 'BASIC' ? handleQrisGatedClick : handleCheckoutQRIS}
+              disabled={isLoading || (tenantConfig?.subscription_plan !== 'BASIC' && cart.length === 0)}
+              className={`font-bold text-xs py-3 rounded-brand shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1.5 ${
+                tenantConfig?.subscription_plan === 'BASIC'
+                  ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/10'
+                  : 'bg-brand-primary hover:bg-brand-primary-hover text-white'
+              }`}
             >
-              Bayar QRIS
+              {tenantConfig?.subscription_plan === 'BASIC' ? (
+                <>
+                  <span className="inline-block bg-white/20 text-[8px] px-1.5 py-0.5 rounded font-black tracking-widest text-white uppercase animate-pulse">PREMIUM</span>
+                  Bayar QRIS 🔒
+                </>
+              ) : (
+                'Bayar QRIS'
+              )}
             </button>
           )}
         </div>

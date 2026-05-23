@@ -7,10 +7,14 @@ import { CashierView } from './features/cashier/CashierView';
 import { KitchenView } from './features/kitchen/KitchenView';
 import { RunnerView } from './features/runner/RunnerView';
 import { AdminView } from './features/admin/AdminView';
+import { DeviceLimitBlocked } from './components/DeviceLimitBlocked';
 import { ShieldAlert, RefreshCw } from 'lucide-react';
 
 const App: React.FC = () => {
-  const { tenantId, setTenant, initializeSocket, isLoading, error } = usePOSStore();
+  const { 
+    tenantId, setTenant, initializeSocket, registerDeviceSocket, 
+    resetDeviceLimitBlock, isDeviceLimitExceeded, blockedRole, isLoading, error 
+  } = usePOSStore();
   const { currentUser, isLoggedIn, initializeAuth, logout } = useAuthStore();
   const [currentTab, setCurrentTab] = useState<'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN'>('CASHIER');
 
@@ -19,20 +23,50 @@ const App: React.FC = () => {
     initializeAuth();
   }, [initializeAuth]);
 
-  // 2. Set initial tenant as Solaria & initialize Websocket client
+  // 2. Resolve initial tenant from subdomain (e.g. moroseneng.sign-in.id) or default to 'moroseneng'
   useEffect(() => {
-    setTenant('solaria');
+    const hostname = window.location.hostname;
+    let initialTenant = 'moroseneng';
+    
+    // Check if the hostname has a subdomain
+    const parts = hostname.split('.');
+    if (parts.length > 1) {
+      const firstPart = parts[0];
+      // Exclude generic/local hosts
+      if (
+        firstPart !== 'localhost' && 
+        firstPart !== 'www' && 
+        firstPart !== '127' && 
+        firstPart !== '10' && 
+        firstPart !== 'sign-in'
+      ) {
+        initialTenant = firstPart;
+      }
+    }
+    
+    console.log(`App: Dynamic tenant resolution resolved '${initialTenant}' from hostname '${hostname}'`);
+    setTenant(initialTenant);
     initializeSocket();
   }, [setTenant, initializeSocket]);
 
-  // 3. Multi-Tenant Session Security Guard: Logout if tenant changes and doesn't match current user
+  // 3. Register device socket upon login state change
+  useEffect(() => {
+    if (isLoggedIn) {
+      registerDeviceSocket();
+    } else {
+      resetDeviceLimitBlock();
+    }
+  }, [isLoggedIn, registerDeviceSocket, resetDeviceLimitBlock]);
+
+  // 4. Multi-Tenant Session Security Guard: Logout if tenant changes and doesn't match current user
   useEffect(() => {
     if (isLoggedIn && currentUser && currentUser.tenant_id !== tenantId) {
       logout();
+      resetDeviceLimitBlock();
     }
-  }, [tenantId, currentUser, isLoggedIn, logout]);
+  }, [tenantId, currentUser, isLoggedIn, logout, resetDeviceLimitBlock]);
 
-  // 4. Role-based Initial Routing Tab selection upon login
+  // 5. Role-based Initial Routing Tab selection upon login
   useEffect(() => {
     if (isLoggedIn && currentUser) {
       if (currentUser.role === 'KITCHEN') {
@@ -50,6 +84,11 @@ const App: React.FC = () => {
   // If unauthenticated, show the custom glassmorphic Login View
   if (!isLoggedIn) {
     return <LoginView />;
+  }
+
+  // If device limit exceeded, show blocker screen
+  if (isDeviceLimitExceeded) {
+    return <DeviceLimitBlocked role={blockedRole || 'KASIR'} />;
   }
 
   return (
