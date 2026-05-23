@@ -45,7 +45,6 @@ export const LoginView: React.FC = () => {
 
   // Detect if on fandb master subdomain
   const isMasterSubdomain = window.location.hostname.split('.')[0] === 'fandb';
-  const plan = tenantConfig?.subscription_plan || 'BASIC';
 
   // Build credentials helper buttons dynamically
   const credentialsHelpers = [
@@ -84,20 +83,18 @@ export const LoginView: React.FC = () => {
     }
   ];
 
-  // Admin role helper is shown only for premium/enterprise plans or on the fandb master hub
-  if (isMasterSubdomain || plan !== 'BASIC') {
-    credentialsHelpers.push({
-      label: 'Admin',
-      user: tenantId === 'moroseneng' 
-        ? 'moroseneng_admin' 
-        : tenantId === 'ingkung-rahtawu' 
-          ? 'rahtawu_admin' 
-          : 'deko_admin',
-      pass: 'admin',
-      role: 'SYSADMIN',
-      color: 'purple'
-    });
-  }
+  // Admin role helper is shown for all plans, allowing Basic tenants to log in and activate licenses
+  credentialsHelpers.push({
+    label: 'Admin',
+    user: tenantId === 'moroseneng' 
+      ? 'moroseneng_admin' 
+      : tenantId === 'ingkung-rahtawu' 
+        ? 'rahtawu_admin' 
+        : 'deko_admin',
+    pass: 'admin',
+    role: 'SYSADMIN',
+    color: 'purple'
+  });
 
   // SysAdmin role helper is exclusively shown on the fandb master subdomain
   if (isMasterSubdomain) {
