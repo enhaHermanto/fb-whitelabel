@@ -305,76 +305,91 @@ export const CashierView: React.FC = () => {
               <p className="text-xs font-medium">Belum ada item ditambahkan</p>
             </div>
           ) : (
-            cart.map((item, idx) => (
-              <div
-                key={`${item.menu_item_id}-${idx}`}
-                className="bg-gray-50 rounded border border-gray-100 p-2.5 flex items-center justify-between"
-              >
-                <div className="space-y-1.5 flex-1 pr-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h5 className="font-bold text-gray-700 text-xs line-clamp-1">{item.name}</h5>
-                      {/* Mini item-level delivery type selector */}
-                      <div className="flex items-center gap-1 mt-1">
-                        <button
-                          type="button"
-                          onClick={() => updateCartItemDeliveryTypeByIndex(idx, 'DINE_IN')}
-                          className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
-                            (item.delivery_type || 'DINE_IN') === 'DINE_IN'
-                              ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20'
-                              : 'bg-gray-200 text-gray-400 border border-transparent'
-                          }`}
-                        >
-                          🍽️ Dine In
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateCartItemDeliveryTypeByIndex(idx, 'TAKE_AWAY')}
-                          className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
-                            (item.delivery_type || 'DINE_IN') === 'TAKE_AWAY'
-                              ? 'bg-amber-100 text-amber-800 border border-amber-250'
-                              : 'bg-gray-200 text-gray-400 border border-transparent'
-                          }`}
-                        >
-                          🛍️ Bawa Pulang
-                        </button>
+            cart.map((item, idx) => {
+              const menuItem = menu.find(m => m.id === item.menu_item_id);
+              const isBeverage = menuItem?.category === 'BEVERAGE';
+              const quickNotes = isBeverage
+                ? ['Less Sugar', 'Less Ice', 'More Ice', 'Split Sugar']
+                : ['Tidak Pedas', 'Pedas', 'Pisah Bumbu'];
+
+              return (
+                <div
+                  key={`${item.menu_item_id}-${idx}`}
+                  className="bg-gray-50 rounded border border-gray-100 p-2.5 flex items-center justify-between"
+                >
+                  <div className="space-y-1.5 flex-1 pr-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h5 className="font-bold text-gray-700 text-xs line-clamp-1">{item.name}</h5>
+                        {/* Mini item-level delivery type selector */}
+                        <div className="flex items-center gap-1 mt-1">
+                          {deliveryType === 'TAKE_AWAY' ? (
+                            <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-250 select-none">
+                              🛍️ Bawa Pulang
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => updateCartItemDeliveryTypeByIndex(idx, 'DINE_IN')}
+                                className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                                  (item.delivery_type || 'DINE_IN') === 'DINE_IN'
+                                    ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20'
+                                    : 'bg-gray-200 text-gray-400 border border-transparent'
+                                }`}
+                              >
+                                🍽️ Dine In
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => updateCartItemDeliveryTypeByIndex(idx, 'TAKE_AWAY')}
+                                className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                                  (item.delivery_type || 'DINE_IN') === 'TAKE_AWAY'
+                                    ? 'bg-amber-100 text-amber-800 border border-amber-250'
+                                    : 'bg-gray-200 text-gray-400 border border-transparent'
+                                }`}
+                              >
+                                🛍️ Bawa Pulang
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
+                      <span className="font-mono text-[10px] text-gray-400">({item.code})</span>
                     </div>
-                    <span className="font-mono text-[10px] text-gray-400">({item.code})</span>
-                  </div>
 
-                  <div className="relative flex items-center gap-1 bg-white border border-gray-250 rounded px-2 py-1 shadow-sm">
-                    <span className="text-[10px] text-gray-400">📝</span>
-                    <input
-                      type="text"
-                      placeholder="Catatan item (tidak pedas, dll)..."
-                      value={item.notes || ''}
-                      onChange={(e) => updateCartItemNotesByIndex(idx, e.target.value)}
-                      className="w-full text-[10px] font-semibold bg-transparent border-none p-0 focus:outline-none focus:ring-0 text-brand-primary placeholder-gray-350"
-                    />
-                  </div>
+                    <div className="relative flex items-center gap-1 bg-white border border-gray-250 rounded px-2 py-1 shadow-sm">
+                      <span className="text-[10px] text-gray-400">📝</span>
+                      <input
+                        type="text"
+                        placeholder="Catatan item (tidak pedas, dll)..."
+                        value={item.notes || ''}
+                        onChange={(e) => updateCartItemNotesByIndex(idx, e.target.value)}
+                        className="w-full text-[10px] font-semibold bg-transparent border-none p-0 focus:outline-none focus:ring-0 text-brand-primary placeholder-gray-350"
+                      />
+                    </div>
 
-                  {/* Touchscreen Quick-tap note buttons */}
-                  <div className="flex flex-wrap gap-1">
-                    {['Tidak Pedas', 'Pedas', 'Gula Pisah', 'Es Sedikit', 'Bungkus'].map((quickNote) => (
-                      <button
-                        key={quickNote}
-                        type="button"
-                        onClick={() => {
-                          const currentNotes = item.notes || '';
-                          const newNotes = currentNotes.includes(quickNote)
-                            ? currentNotes
-                            : currentNotes
-                            ? `${currentNotes}, ${quickNote}`
-                            : quickNote;
-                          updateCartItemNotesByIndex(idx, newNotes);
-                        }}
-                        className="text-[8px] font-bold px-1.5 py-0.5 bg-white hover:bg-brand-primary/10 hover:text-brand-primary text-gray-500 rounded border border-gray-200 transition-all duration-150 cursor-pointer"
-                      >
-                        +{quickNote}
-                      </button>
-                    ))}
-                  </div>
+                    {/* Touchscreen Quick-tap note buttons */}
+                    <div className="flex flex-wrap gap-1">
+                      {quickNotes.map((quickNote) => (
+                        <button
+                          key={quickNote}
+                          type="button"
+                          onClick={() => {
+                            const currentNotes = item.notes || '';
+                            const newNotes = currentNotes.includes(quickNote)
+                              ? currentNotes
+                              : currentNotes
+                              ? `${currentNotes}, ${quickNote}`
+                              : quickNote;
+                            updateCartItemNotesByIndex(idx, newNotes);
+                          }}
+                          className="text-[8px] font-bold px-1.5 py-0.5 bg-white hover:bg-brand-primary/10 hover:text-brand-primary text-gray-500 rounded border border-gray-200 transition-all duration-150 cursor-pointer"
+                        >
+                          +{quickNote}
+                        </button>
+                      ))}
+                    </div>
 
                   <div className="text-[11px] font-extrabold text-brand-primary pt-0.5">
                     Rp {(item.price * item.quantity).toLocaleString('id-ID')}
@@ -401,7 +416,8 @@ export const CashierView: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
 

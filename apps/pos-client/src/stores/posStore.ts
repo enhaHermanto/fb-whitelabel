@@ -96,7 +96,15 @@ export const usePOSStore = create<POSState>((set, get) => ({
 
   setOrderNotes: (orderNotes: string) => set({ orderNotes }),
 
-  setDeliveryType: (deliveryType: 'DINE_IN' | 'TAKE_AWAY') => set({ deliveryType }),
+  setDeliveryType: (deliveryType: 'DINE_IN' | 'TAKE_AWAY') => {
+    set((state) => {
+      const updatedCart = state.cart.map(item => ({
+        ...item,
+        delivery_type: deliveryType
+      }));
+      return { deliveryType, cart: updatedCart };
+    });
+  },
 
   updateCartItemNotesByIndex: (index: number, notes: string) => {
     set((state) => {
