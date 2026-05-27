@@ -224,10 +224,10 @@ export const CashierView: React.FC = () => {
       {/* Cart & Checkout Section */}
       <div className="bg-white rounded-brand border border-gray-200 p-3 shadow-sm flex flex-col h-full min-h-0 overflow-hidden">
         {/* Cart Header */}
-        <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-brand-primary" />
-            <h3 className="font-extrabold text-gray-800 text-sm">Keranjang Pesanan</h3>
+            <ShoppingCart className="w-4 h-4 text-brand-primary" />
+            <h3 className="font-extrabold text-gray-800 text-xs">Keranjang Pesanan</h3>
           </div>
           {cart.length > 0 && (
             <button
@@ -235,13 +235,13 @@ export const CashierView: React.FC = () => {
               className="text-gray-400 hover:text-brand-error transition-all duration-200"
               title="Bersihkan Keranjang"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
         {/* Input Nomor Meja & Kasir */}
-        <div className="grid grid-cols-2 gap-2 mb-2 flex-shrink-0">
+        <div className="grid grid-cols-2 gap-1.5 mb-1.5 flex-shrink-0">
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-brand-text-secondary flex items-center gap-1 uppercase">
               <Hash className="w-3 h-3 text-brand-primary" /> Nomor Meja <span className="text-brand-error">*</span>
@@ -438,7 +438,7 @@ export const CashierView: React.FC = () => {
         </div>
 
         {/* Pricing Subtotal - sticky bottom */}
-        <div className="border-t border-gray-100 pt-2 mb-2 space-y-1 text-xs flex-shrink-0">
+        <div className="border-t border-gray-100 pt-1.5 mb-1.5 space-y-0.5 text-xs flex-shrink-0">
           <div className="flex justify-between text-gray-500">
             <span>Subtotal:</span>
             <span>Rp {cartTotal.toLocaleString('id-ID')}</span>
@@ -447,7 +447,7 @@ export const CashierView: React.FC = () => {
             <span>PPN (10%):</span>
             <span>Rp {Math.round(cartTotal * 0.1).toLocaleString('id-ID')}</span>
           </div>
-          <div className="flex justify-between text-gray-800 font-extrabold text-sm border-t border-dashed border-gray-100 pt-2">
+          <div className="flex justify-between text-gray-800 font-extrabold text-sm border-t border-dashed border-gray-100 pt-1">
             <span>TOTAL:</span>
             <span className="text-brand-primary">
               Rp {Math.round(cartTotal * 1.1).toLocaleString('id-ID')}
@@ -456,11 +456,11 @@ export const CashierView: React.FC = () => {
         </div>
 
         {/* Actions Checkout buttons */}
-        <div className="grid grid-cols-2 gap-2 flex-shrink-0">
+        <div className="grid grid-cols-2 gap-1.5 flex-shrink-0">
           <button
             onClick={handleCheckoutCash}
             disabled={isLoading || cart.length === 0}
-            className="bg-gray-800 hover:bg-gray-900 text-white font-bold text-xs py-3 rounded-brand shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="bg-gray-800 hover:bg-gray-900 text-white font-bold text-xs py-2.5 rounded-brand shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Bayar Tunai
           </button>
@@ -469,7 +469,7 @@ export const CashierView: React.FC = () => {
             <button
               onClick={tenantConfig?.subscription_plan === 'BASIC' ? handleQrisGatedClick : handleCheckoutQRIS}
               disabled={isLoading || (tenantConfig?.subscription_plan !== 'BASIC' && cart.length === 0)}
-              className={`font-bold text-xs py-3 rounded-brand shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`font-bold text-xs py-2.5 rounded-brand shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1.5 ${
                 tenantConfig?.subscription_plan === 'BASIC'
                   ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/10'
                   : 'bg-brand-primary hover:bg-brand-primary-hover text-white'
