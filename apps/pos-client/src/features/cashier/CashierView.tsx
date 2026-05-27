@@ -103,9 +103,9 @@ export const CashierView: React.FC = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-6 h-full p-2 min-h-0 overflow-hidden">
+    <div className="grid md:grid-cols-3 gap-6 h-full p-2 min-h-0 overflow-hidden">
       {/* Category & Menu Section */}
-      <div className="lg:col-span-2 flex flex-col h-full space-y-4 min-h-0">
+      <div className="md:col-span-2 flex flex-col h-full space-y-4 min-h-0">
         {/* Category Selector */}
         <div className="flex gap-2 overflow-x-auto pb-2 border-b border-gray-200">
           {[
@@ -135,7 +135,7 @@ export const CashierView: React.FC = () => {
         {/* Menu Grid Container (Scrollable) */}
         <div className="flex-1 overflow-y-auto pr-1">
           {/* Menu Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMenu.map(item => (
             <div
               key={item.id}
