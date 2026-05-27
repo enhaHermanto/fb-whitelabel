@@ -28,7 +28,7 @@ export const RunnerView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto space-y-4 p-2 h-full flex flex-col min-h-0 overflow-hidden">
+    <div className="max-w-md mx-auto space-y-3 p-1 md:p-2 h-full flex flex-col min-h-0">
       {/* Runner Bar */}
       <div className="bg-white rounded-brand border border-gray-200 p-4 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-2">

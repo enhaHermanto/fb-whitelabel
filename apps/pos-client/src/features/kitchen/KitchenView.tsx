@@ -92,7 +92,7 @@ export const KitchenView: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4 p-2 min-h-0 overflow-hidden">
+    <div className="flex flex-col h-full space-y-3 p-1 md:p-2 min-h-0">
       {/* Kitchen status bar */}
       <div className="bg-white rounded-brand border border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
@@ -115,9 +115,9 @@ export const KitchenView: React.FC = () => {
       </div>
 
       {/* Kanban Grid */}
-      <div className="flex-1 grid md:grid-cols-3 gap-6 overflow-hidden">
+      <div className="flex-1 grid md:grid-cols-3 gap-3 lg:gap-6 min-h-0 overflow-hidden">
         {/* COLUMN 1: NEW ORDERS */}
-        <div className="bg-gray-100/80 rounded-brand border border-gray-200/50 flex flex-col h-full shadow-inner">
+        <div className="bg-gray-100/80 rounded-brand border border-gray-200/50 flex flex-col min-h-0 shadow-inner overflow-hidden">
           <div className="bg-white px-4 py-3.5 rounded-t-brand border-b border-gray-200 flex justify-between items-center">
             <span className="font-extrabold text-xs text-gray-800 tracking-wider flex items-center gap-1.5 uppercase">
               <Bell className="w-4 h-4 text-brand-primary animate-bounce" /> New Orders
@@ -211,7 +211,7 @@ export const KitchenView: React.FC = () => {
         </div>
 
         {/* COLUMN 2: COOKING */}
-        <div className="bg-gray-100/80 rounded-brand border border-gray-200/50 flex flex-col h-full shadow-inner">
+        <div className="bg-gray-100/80 rounded-brand border border-gray-200/50 flex flex-col min-h-0 shadow-inner overflow-hidden">
           <div className="bg-white px-4 py-3.5 rounded-t-brand border-b border-gray-200 flex justify-between items-center">
             <span className="font-extrabold text-xs text-gray-800 tracking-wider flex items-center gap-1.5 uppercase">
               <Flame className="w-4 h-4 text-orange-500 animate-pulse" /> Cooking Process
@@ -308,7 +308,7 @@ export const KitchenView: React.FC = () => {
         </div>
 
         {/* COLUMN 3: READY FOR RUNNER */}
-        <div className="bg-gray-100/80 rounded-brand border border-gray-200/50 flex flex-col h-full shadow-inner">
+        <div className="bg-gray-100/80 rounded-brand border border-gray-200/50 flex flex-col min-h-0 shadow-inner overflow-hidden">
           <div className="bg-white px-4 py-3.5 rounded-t-brand border-b border-gray-200 flex justify-between items-center">
             <span className="font-extrabold text-xs text-gray-800 tracking-wider flex items-center gap-1.5 uppercase">
               <CheckCircle2 className="w-4 h-4 text-green-500" /> Ready to Serve

@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
   };
 
   return (
-    <header className="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200/80 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm select-none">
+    <header className="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200/80 px-4 md:px-6 py-2 md:py-3 flex flex-col md:flex-row justify-between items-center gap-2 md:gap-3 shadow-sm select-none">
       {/* Brand logo & title */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-primary/20 flex items-center justify-center bg-brand-surface shadow-sm transition-all duration-300">
