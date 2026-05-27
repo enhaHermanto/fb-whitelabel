@@ -103,7 +103,7 @@ export const CashierView: React.FC = () => {
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 h-full p-2 min-h-0 overflow-hidden">
+    <div className="grid md:grid-cols-3 gap-3 lg:gap-6 h-full p-1 md:p-2 min-h-0 overflow-hidden">
       {/* Category & Menu Section */}
       <div className="md:col-span-2 flex flex-col h-full space-y-4 min-h-0">
         {/* Category Selector */}
@@ -222,7 +222,7 @@ export const CashierView: React.FC = () => {
       </div>
 
       {/* Cart & Checkout Section */}
-      <div className="bg-white rounded-brand border border-gray-200 p-4 shadow-sm flex flex-col h-full min-h-0">
+      <div className="bg-white rounded-brand border border-gray-200 p-3 shadow-sm flex flex-col h-full min-h-0 overflow-hidden">
         {/* Cart Header */}
         <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
           <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export const CashierView: React.FC = () => {
         </div>
 
         {/* Input Nomor Meja & Kasir */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-2 mb-2 flex-shrink-0">
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-brand-text-secondary flex items-center gap-1 uppercase">
               <Hash className="w-3 h-3 text-brand-primary" /> Nomor Meja <span className="text-brand-error">*</span>
@@ -264,41 +264,42 @@ export const CashierView: React.FC = () => {
           </div>
         </div>
 
-        {/* Tipe Pesanan Bawaan (Default Order Delivery Type) */}
-        {cart.length > 0 && (
-          <div className="mb-4 space-y-1">
-            <label className="text-[10px] font-bold text-brand-text-secondary flex items-center gap-1 uppercase">
-              📍 Tipe Pesanan Utama
-            </label>
-            <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-brand border border-gray-200">
-              <button
-                type="button"
-                onClick={() => setDeliveryType('DINE_IN')}
-                className={`py-2 px-3 text-xs font-bold rounded-brand transition-all duration-200 cursor-pointer ${
-                  deliveryType === 'DINE_IN'
-                    ? 'bg-brand-primary text-white shadow-sm'
-                    : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-200 shadow-sm'
-                }`}
-              >
-                🍽️ Dine In
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeliveryType('TAKE_AWAY')}
-                className={`py-2 px-3 text-xs font-bold rounded-brand transition-all duration-200 cursor-pointer ${
-                  deliveryType === 'TAKE_AWAY'
-                    ? 'bg-brand-primary text-white shadow-sm'
-                    : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-200 shadow-sm'
-                }`}
-              >
-                🛍️ Take Away
-              </button>
+        {/* Scrollable Cart Content: Delivery Type + Items + Order Notes */}
+        <div className="flex-1 overflow-y-auto pr-1 mb-2 min-h-[120px] space-y-3">
+          {/* Tipe Pesanan Bawaan (Default Order Delivery Type) */}
+          {cart.length > 0 && (
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-brand-text-secondary flex items-center gap-1 uppercase">
+                📍 Tipe Pesanan Utama
+              </label>
+              <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-brand border border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryType('DINE_IN')}
+                  className={`py-1.5 px-3 text-xs font-bold rounded-brand transition-all duration-200 cursor-pointer ${
+                    deliveryType === 'DINE_IN'
+                      ? 'bg-brand-primary text-white shadow-sm'
+                      : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-200 shadow-sm'
+                  }`}
+                >
+                  🍽️ Dine In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeliveryType('TAKE_AWAY')}
+                  className={`py-1.5 px-3 text-xs font-bold rounded-brand transition-all duration-200 cursor-pointer ${
+                    deliveryType === 'TAKE_AWAY'
+                      ? 'bg-brand-primary text-white shadow-sm'
+                      : 'bg-white text-gray-500 hover:text-gray-700 border border-gray-200 shadow-sm'
+                  }`}
+                >
+                  🛍️ Take Away
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Cart Items list */}
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-4">
+          {/* Cart Items list */}
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-300 space-y-2">
               <ShoppingCart className="w-12 h-12 stroke-[1.5]" />
@@ -419,25 +420,25 @@ export const CashierView: React.FC = () => {
               );
             })
           )}
+
+          {/* Catatan Khusus Pesanan (Order Notes) - inside scrollable area */}
+          {cart.length > 0 && (
+            <div className="space-y-1 pt-2 border-t border-gray-100">
+              <label className="text-[10px] font-bold text-brand-text-secondary flex items-center gap-1 uppercase">
+                <MessageSquare className="w-3 h-3 text-brand-primary" /> Catatan Khusus Pesanan
+              </label>
+              <textarea
+                placeholder="Catatan order (garam dikit, sendok garpu, dll)..."
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                className="w-full text-xs bg-gray-50 border border-gray-200 rounded px-2.5 py-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary h-10 resize-none"
+              />
+            </div>
+          )}
         </div>
 
-        {/* Catatan Khusus Pesanan (Order Notes) */}
-        {cart.length > 0 && (
-          <div className="mb-4 space-y-1">
-            <label className="text-[10px] font-bold text-brand-text-secondary flex items-center gap-1 uppercase">
-              <MessageSquare className="w-3 h-3 text-brand-primary" /> Catatan Khusus Pesanan
-            </label>
-            <textarea
-              placeholder="Tambahkan catatan khusus untuk seluruh pesanan ini (misal: garam dikit, sendok garpu, gak pedas)..."
-              value={orderNotes}
-              onChange={(e) => setOrderNotes(e.target.value)}
-              className="w-full text-xs bg-gray-50 border border-gray-200 rounded px-2.5 py-2 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary h-14 resize-none"
-            />
-          </div>
-        )}
-
-        {/* Pricing Subtotal */}
-        <div className="border-t border-gray-100 pt-3 mb-4 space-y-2 text-xs">
+        {/* Pricing Subtotal - sticky bottom */}
+        <div className="border-t border-gray-100 pt-2 mb-2 space-y-1 text-xs flex-shrink-0">
           <div className="flex justify-between text-gray-500">
             <span>Subtotal:</span>
             <span>Rp {cartTotal.toLocaleString('id-ID')}</span>
@@ -455,7 +456,7 @@ export const CashierView: React.FC = () => {
         </div>
 
         {/* Actions Checkout buttons */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 flex-shrink-0">
           <button
             onClick={handleCheckoutCash}
             disabled={isLoading || cart.length === 0}
