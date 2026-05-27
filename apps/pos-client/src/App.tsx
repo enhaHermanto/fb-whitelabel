@@ -7,6 +7,7 @@ import { CashierView } from './features/cashier/CashierView';
 import { KitchenView } from './features/kitchen/KitchenView';
 import { RunnerView } from './features/runner/RunnerView';
 import { AdminView } from './features/admin/AdminView';
+import { CustomerView } from './features/customer/CustomerView';
 import { DeviceLimitBlocked } from './components/DeviceLimitBlocked';
 import { ShieldAlert, RefreshCw } from 'lucide-react';
 
@@ -16,7 +17,7 @@ const App: React.FC = () => {
     resetDeviceLimitBlock, isDeviceLimitExceeded, blockedRole, isLoading, error 
   } = usePOSStore();
   const { currentUser, isLoggedIn, initializeAuth, logout } = useAuthStore();
-  const [currentTab, setCurrentTab] = useState<'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN'>('CASHIER');
+  const [currentTab, setCurrentTab] = useState<'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN' | 'CUSTOMER'>('CASHIER');
 
   // 1. Initialize Authentication session on mount
   useEffect(() => {
@@ -78,6 +79,8 @@ const App: React.FC = () => {
         setCurrentTab('CASHIER');
       } else if (currentUser.role === 'SYSADMIN' || currentUser.role === 'MANAGEMENT') {
         setCurrentTab('ADMIN');
+      } else if (currentUser.role === 'CUSTOMER') {
+        setCurrentTab('CUSTOMER');
       }
     }
   }, [isLoggedIn, currentUser]);
@@ -98,7 +101,7 @@ const App: React.FC = () => {
       <Header currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       {/* Main View Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col min-h-0 overflow-hidden">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-2 md:p-4 flex flex-col min-h-0 overflow-y-auto">
         {/* Global Loading Overlay */}
         {isLoading && (
           <div className="fixed inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 animate-in fade-in duration-200">
@@ -126,6 +129,7 @@ const App: React.FC = () => {
           {currentTab === 'KITCHEN' && <KitchenView />}
           {currentTab === 'RUNNER' && <RunnerView />}
           {currentTab === 'ADMIN' && <AdminView />}
+          {currentTab === 'CUSTOMER' && <CustomerView />}
         </div>
       </main>
     </div>

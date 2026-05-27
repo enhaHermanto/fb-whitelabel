@@ -486,12 +486,14 @@ export class SQLiteDB {
       { id: 'u-mor-cashier', tenant_id: 'moroseneng', username: 'moroseneng_cashier', name: 'Sri Wahyuni', role: 'KASIR', password: 'cashier' },
       { id: 'u-mor-kitchen', tenant_id: 'moroseneng', username: 'moroseneng_kitchen', name: 'Pak Slamet', role: 'KITCHEN', password: 'kitchen' },
       { id: 'u-mor-runner', tenant_id: 'moroseneng', username: 'moroseneng_runner', name: 'Tono Runner', role: 'RUNNER', password: 'runner' },
+      { id: 'u-mor-customer', tenant_id: 'moroseneng', username: 'moroseneng_customer', name: 'Tamu Moroseneng', role: 'CUSTOMER', password: 'customer' },
 
       // Ingkung Rahtawu Users
       { id: 'u-rah-admin', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_admin', name: 'Rahtawu Admin', role: 'SYSADMIN', password: 'admin' },
       { id: 'u-rah-cashier', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_cashier', name: 'Wahyu Cashier', role: 'KASIR', password: 'cashier' },
       { id: 'u-rah-kitchen', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_kitchen', name: 'Siti Chef', role: 'KITCHEN', password: 'kitchen' },
       { id: 'u-rah-runner', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_runner', name: 'Lilik Runner', role: 'RUNNER', password: 'runner' },
+      { id: 'u-rah-customer', tenant_id: 'ingkung-rahtawu', username: 'rahtawu_customer', name: 'Tamu Rahtawu', role: 'CUSTOMER', password: 'customer' },
 
       // Deko Cafe Users
       { id: 'u-dec-admin', tenant_id: 'deko-cafe', username: 'deko_admin', name: 'Deko Admin', role: 'SYSADMIN', password: 'admin' },

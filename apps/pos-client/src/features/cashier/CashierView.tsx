@@ -222,7 +222,7 @@ export const CashierView: React.FC = () => {
       </div>
 
       {/* Cart & Checkout Section */}
-      <div className="bg-white rounded-brand border border-gray-200 p-3 shadow-sm flex flex-col h-full min-h-0 overflow-hidden">
+      <div className="bg-white rounded-brand border border-gray-200 p-3 shadow-sm flex flex-col h-full min-h-0">
         {/* Cart Header */}
         <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -444,13 +444,13 @@ export const CashierView: React.FC = () => {
             <span>Rp {cartTotal.toLocaleString('id-ID')}</span>
           </div>
           <div className="flex justify-between text-gray-500">
-            <span>PPN (10%):</span>
-            <span>Rp {Math.round(cartTotal * 0.1).toLocaleString('id-ID')}</span>
+            <span>PPN (11%):</span>
+            <span>Rp {Math.round(cartTotal * 0.11).toLocaleString('id-ID')}</span>
           </div>
           <div className="flex justify-between text-gray-800 font-extrabold text-sm border-t border-dashed border-gray-100 pt-1">
             <span>TOTAL:</span>
             <span className="text-brand-primary">
-              Rp {Math.round(cartTotal * 1.1).toLocaleString('id-ID')}
+              Rp {Math.round(cartTotal * 1.11).toLocaleString('id-ID')}
             </span>
           </div>
         </div>
@@ -515,7 +515,7 @@ export const CashierView: React.FC = () => {
             <div className="space-y-1">
               <p className="text-gray-400 text-xs">Total Pembayaran (Termasuk Pajak):</p>
               <div className="text-xl font-extrabold text-brand-primary">
-                Rp {Math.round(qrisOrder.total_price * 1.1).toLocaleString('id-ID')}
+                Rp {Math.round(qrisOrder.total_price * 1.11).toLocaleString('id-ID')}
               </div>
             </div>
 
@@ -636,12 +636,12 @@ export const CashierView: React.FC = () => {
                     <span>Rp {printedOrder.total_price.toLocaleString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>PPN (10%):</span>
-                    <span>Rp {Math.round(printedOrder.total_price * 0.1).toLocaleString('id-ID')}</span>
+                    <span>PPN (11%):</span>
+                    <span>Rp {Math.round(printedOrder.total_price * 0.11).toLocaleString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between font-bold text-black text-xs border-t border-dashed border-gray-300 pt-2 mt-1">
                     <span>GRAND TOTAL:</span>
-                    <span>Rp {Math.round(printedOrder.total_price * 1.1).toLocaleString('id-ID')}</span>
+                    <span>Rp {Math.round(printedOrder.total_price * 1.11).toLocaleString('id-ID')}</span>
                   </div>
                 </div>
 

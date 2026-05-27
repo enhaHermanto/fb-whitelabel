@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { usePOSStore } from '../stores/posStore';
 import { useAuthStore } from '../stores/authStore';
-import { Circle, Shield, User, Clock, Monitor, RefreshCw, LayoutDashboard, LogOut } from 'lucide-react';
+import { Circle, Shield, User, Clock, Monitor, RefreshCw, LayoutDashboard, LogOut, Eye } from 'lucide-react';
 
 interface HeaderProps {
-  currentTab: 'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN';
-  setCurrentTab: (tab: 'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN') => void;
+  currentTab: 'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN' | 'CUSTOMER';
+  setCurrentTab: (tab: 'CASHIER' | 'KITCHEN' | 'RUNNER' | 'ADMIN' | 'CUSTOMER') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => {
@@ -42,7 +42,8 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
     { id: 'CASHIER', label: 'Kasir (POS)', icon: Monitor, roles: ['KASIR', 'MANAGEMENT', 'SYSADMIN'] },
     { id: 'KITCHEN', label: 'Dapur (KDS)', icon: RefreshCw, roles: ['KITCHEN', 'MANAGEMENT', 'SYSADMIN'] },
     { id: 'RUNNER', label: 'Runner App', icon: User, roles: ['RUNNER', 'MANAGEMENT', 'SYSADMIN'] },
-    { id: 'ADMIN', label: 'Back Office', icon: LayoutDashboard, roles: ['MANAGEMENT', 'SYSADMIN'] }
+    { id: 'ADMIN', label: 'Back Office', icon: LayoutDashboard, roles: ['MANAGEMENT', 'SYSADMIN'] },
+    { id: 'CUSTOMER', label: 'Layar Pelanggan', icon: Eye, roles: ['CUSTOMER', 'MANAGEMENT', 'SYSADMIN'] }
   ];
 
   // Filter tabs by active user role
@@ -58,6 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
       case 'KASIR': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'KITCHEN': return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'RUNNER': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'CUSTOMER': return 'bg-cyan-50 text-cyan-700 border-cyan-200';
       default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };

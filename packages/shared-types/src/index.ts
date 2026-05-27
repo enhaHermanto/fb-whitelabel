@@ -99,7 +99,7 @@ export interface Order {
   delivered_at?: string;
 }
 
-export type UserRole = 'KASIR' | 'KITCHEN' | 'RUNNER' | 'MANAGEMENT' | 'SYSADMIN';
+export type UserRole = 'KASIR' | 'KITCHEN' | 'RUNNER' | 'MANAGEMENT' | 'SYSADMIN' | 'CUSTOMER';
 
 export interface User {
   id: string;
